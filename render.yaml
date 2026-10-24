@@ -1,9 +1,9 @@
-# Este Blueprint crea recursos de pago para conservar SQLite entre despliegues.
+# Plan Free: SQLite es temporal y se pierde al suspender, reiniciar o desplegar.
 services:
   - type: web
     name: estadia
     runtime: node
-    plan: starter
+    plan: free
     numInstances: 1
     buildCommand: npm ci
     startCommand: npm start
@@ -12,8 +12,4 @@ services:
       - key: NODE_ENV
         value: production
       - key: DB_PATH
-        value: /var/data/estadia.sqlite
-    disk:
-      name: estadia-data
-      mountPath: /var/data
-      sizeGB: 1
+        value: ./data/estadia.sqlite

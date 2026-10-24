@@ -44,13 +44,13 @@ Sustituye `TU_USUARIO` y `TU_REPOSITORIO` por tus valores. Esta carpeta ya tiene
 
 GitHub Actions ejecutará `npm ci` y `npm test` con cada push y pull request.
 
-## Desplegar en Render con Blueprint
+## Desplegar gratis en Render con Blueprint
 
-**El archivo `render.yaml` configura un Web Service de pago (`starter`) y un disco persistente de 1 GB. Revisa los cargos que muestre Render antes de crear los recursos.** El disco conserva SQLite entre reinicios y despliegues. Los discos persistentes requieren un servicio de pago; el sistema de archivos normal de Render es efímero. [Documentación de discos](https://render.com/docs/disks).
+**El archivo `render.yaml` configura un Web Service en el plan Free, sin disco persistente.** SQLite es temporal: las cuentas, sesiones y conjuntos se pierden cuando el servicio se suspende, reinicia o se vuelve a desplegar. Render suspende los servicios Free tras 15 minutos sin tráfico; la siguiente visita puede tardar aproximadamente un minuto en cargar. [Limitaciones del plan Free](https://render.com/docs/free).
 
 1. Sube el proyecto a GitHub siguiendo los pasos anteriores.
 2. En Render, selecciona **New → Blueprint** y conecta el repositorio.
-3. Render detectará `render.yaml`. Revisa el servicio y el disco y confirma su creación.
+3. Usa la rama `main` y la ruta `render.yaml`. Revisa que el servicio indique el plan **Free**, sin disco, y pulsa **Deploy Blueprint**.
 4. Cuando termine el despliegue, abre la URL HTTPS que Render asigna al servicio y crea tu cuenta.
 5. Comprueba que `https://TU_SERVICIO.onrender.com/healthz` devuelve `{"ok":true}`.
 
@@ -59,19 +59,20 @@ El Blueprint configura:
 | Opción | Valor |
 | --- | --- |
 | Runtime | Node |
+| Plan | Free |
 | Build Command | `npm ci` |
 | Start Command | `npm start` |
 | Health Check Path | `/healthz` |
 | NODE_ENV | `production` |
-| DB_PATH | `/var/data/estadia.sqlite` |
-| Disco | `/var/data`, 1 GB |
+| DB_PATH | `./data/estadia.sqlite` (temporal) |
+| Disco persistente | Ninguno |
 | Instancias | 1 |
 
-También puedes crear **New → Web Service** manualmente con los mismos valores y agregar el disco desde las opciones del servicio. Deja **Root Directory vacío** si subiste el contenido de `estadia` como raíz del repositorio. Si el repositorio contiene una carpeta `estadia`, usa `estadia` como Root Directory; para Blueprint, selecciona además `estadia/render.yaml` como ruta del archivo y añade `rootDir: estadia` al servicio.
+También puedes crear **New → Web Service** manualmente con los mismos valores y seleccionar **Free** como Instance Type, sin agregar un disco. Deja **Root Directory vacío** si subiste el contenido de `estadia` como raíz del repositorio. Si el repositorio contiene una carpeta `estadia`, usa `estadia` como Root Directory; para Blueprint, selecciona además `estadia/render.yaml` como ruta del archivo y añade `rootDir: estadia` al servicio.
 
 Render proporciona `PORT`, `RENDER` y `RENDER_EXTERNAL_URL` automáticamente. El servidor escucha en `0.0.0.0` en Render y usa la URL pública para validar el origen y emitir cookies `Secure`. No configures `APP_ORIGIN` con localhost en producción.
 
-Los siguientes pushes a la rama conectada despliegan los cambios automáticamente. La aplicación mantiene una sola instancia porque usa una base SQLite local al disco.
+Los siguientes pushes a la rama conectada despliegan los cambios automáticamente. La aplicación usa una sola instancia con SQLite local y temporal en Render Free.
 
 ### Dominio propio y variables opcionales
 
@@ -83,13 +84,13 @@ Para un dominio propio, configura `APP_ORIGIN` con su origen exacto, por ejemplo
 node --env-file=.env server.js
 ```
 
-Para una demostración gratuita puedes crear un Web Service sin disco y dejar `DB_PATH` sin configurar, pero **las cuentas y conjuntos se perderán al reiniciar o desplegar**. El Blueprint incluido está preparado para conservar datos.
+Para conservar los datos a largo plazo será necesario adaptar la aplicación a una base externa o usar un servicio de pago con disco persistente. El Blueprint incluido utiliza únicamente el servicio Free. Si ya habías creado recursos de pago, revisa esos recursos en Render: cambiar este archivo no elimina automáticamente un disco existente.
 
 ### Diagnóstico
 
 - Si falla el inicio, revisa los logs y que Render use Node 22.17 o superior de la rama 22; `node:sqlite` debe estar disponible.
 - Si aparece «Origen de solicitud inválido», revisa `APP_ORIGIN` y la URL desde la que abres la aplicación.
-- Si desaparecen los datos, comprueba que el disco esté montado en `/var/data` y `DB_PATH` apunte a `/var/data/estadia.sqlite`.
+- Si desaparecen los datos en Render Free, es el comportamiento esperado al suspender, reiniciar o desplegar el servicio: SQLite está en almacenamiento temporal.
 - El límite de intentos utiliza la IP del socket. Detrás del proxy de Render algunos visitantes pueden compartir ese límite y recibir un bloqueo de 15 minutos tras varios intentos fallidos.
 
 ## Archivos principales
