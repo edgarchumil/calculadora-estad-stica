@@ -1597,3 +1597,59 @@ footer {
   color: #f2d598;
   overflow-wrap: anywhere;
 }
+
+/* Generalidades antes de las gráficas y tabla agrupada a su lado. */
+.generalities {
+  margin-bottom: 20px;
+}
+.general-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 16px;
+}
+.general-stat {
+  padding: 12px;
+  background: #ffffff05;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  min-width: 0;
+}
+.general-stat span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+}
+.general-stat strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 23px;
+  color: #f2d598;
+  overflow-wrap: anywhere;
+}
+.analysis-grid {
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  align-items: start;
+}
+.frequency-table-scroll {
+  overflow-x: auto;
+}
+.frequency-table-scroll table {
+  min-width: 580px;
+}
+.frequency-table-scroll td,
+.frequency-table-scroll th {
+  padding: 11px 9px;
+  white-space: nowrap;
+}
+.frequency-table-scroll tfoot {
+  font-weight: 700;
+  color: #f2d598;
+}
+#analysis-content > .distribution {
+  margin-top: 20px;
+}
+@media (max-width: 1100px) {
+  .analysis-grid {
+    grid-template-columns: 1fr;
+  }
+}

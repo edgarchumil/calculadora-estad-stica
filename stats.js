@@ -104,28 +104,65 @@ export function statistics(values) {
   };
 }
 
-// Intervalos iguales: sqrt(n) grupos; el extremo derecho del último incluye el máximo.
-// Cada frecuencia relativa es count/n; la suma de los grupos es 1.
-export function frequencyDistribution(values) {
+// Sturges: K = ceil(1 + log2(n)), equivalente a redondear hacia arriba 1 + 3.321928×log10(n).
+// Sin variación se usa un único intervalo puntual: R=0, A=0, sin inventar límites.
+export function groupedSummary(values) {
+  const n = values.length;
+  if (!n)
+    return {
+      n: 0,
+      min: 0,
+      max: 0,
+      range: 0,
+      midrange: 0,
+      sturgesK: 0,
+      k: 0,
+      amplitude: 0,
+    };
   const min = Math.min(...values),
-    max = Math.max(...values);
-  if (!values.length) return [];
-  const count =
-    min === max ? 1 : Math.min(20, Math.ceil(Math.sqrt(values.length)));
-  const padding = Math.max(Math.abs(min) * 0.05, 0.5);
-  const start = min === max ? min - padding : min;
-  const width = min === max ? padding * 2 : (max - min) / count;
-  const bins = Array.from({ length: count }, (_, i) => ({
-    lower: start + i * width,
-    upper: i === count - 1 && min !== max ? max : start + (i + 1) * width,
-    midpoint: start + (i + 0.5) * width,
+    max = Math.max(...values),
+    range = max - min;
+  const sturgesK = Math.ceil(1 + Math.log2(n));
+  const k = range === 0 ? 1 : sturgesK;
+  return {
+    n,
+    min,
+    max,
+    range,
+    midrange: (min + max) / 2,
+    sturgesK,
+    k,
+    amplitude: range / k,
+  };
+}
+
+// Intervalos [Li, Ls); el último incluye Xmax. Las mismas clases alimentan tabla y gráficas.
+export function frequencyDistribution(values) {
+  const g = groupedSummary(values);
+  if (!g.n) return [];
+  const bins = Array.from({ length: g.k }, (_, i) => ({
+    lower: g.min + i * g.amplitude,
+    upper: i === g.k - 1 ? g.max : g.min + (i + 1) * g.amplitude,
+    midpoint: g.min + (i + 0.5) * g.amplitude,
     count: 0,
     relative: 0,
+    cumulative: 0,
+    cumulativeRelative: 0,
   }));
-  for (const value of values)
-    bins[Math.min(count - 1, Math.max(0, Math.floor((value - start) / width)))]
-      .count++;
-  for (const bin of bins) bin.relative = bin.count / values.length;
+  for (const value of values) {
+    // Comparar con los límites reales evita diferencias de redondeo entre la tabla y el conteo.
+    const index = bins.findIndex(
+      (bin, i) => value < bin.upper || i === bins.length - 1,
+    );
+    bins[index].count++;
+  }
+  let total = 0;
+  for (const bin of bins) {
+    total += bin.count;
+    bin.relative = bin.count / g.n;
+    bin.cumulative = total;
+    bin.cumulativeRelative = total / g.n;
+  }
   return bins;
 }
 

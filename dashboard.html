@@ -179,6 +179,12 @@
         <div id="analysis-content" hidden>
           <!-- Contenedor vacío: app.js genera aquí las tarjetas de media, mediana, moda y cantidad. -->
           <div class="metrics" id="metrics"></div>
+          <!-- Resumen de los datos y regla usada por todas las gráficas de frecuencia. -->
+          <section class="card generalities" aria-labelledby="general-title">
+            <h2 id="general-title">Generalidades y regla de Sturges</h2>
+            <div id="general-stats" class="general-stats"></div>
+            <p id="sturges-note" class="field-help"></p>
+          </section>
           <!-- Todas las gráficas se alternan en este único selector mediante app.js. -->
           <section class="analysis-grid" id="charts-section">
             <article class="card chart-card">
@@ -307,75 +313,89 @@
                 <span id="chart-count"></span>
               </div>
             </article>
-            <article class="card distribution">
-              <span class="eyebrow">MÁS ALLÁ DEL PROMEDIO</span>
-              <h2>Distribución en detalle</h2>
-              <!-- Aquí se insertan cuartiles, varianzas, rango y otros resultados calculados. -->
-              <div id="detail-stats"></div>
-              <!-- Consulta individual de los cuartiles del análisis seleccionado. -->
-              <div class="quartile-section">
-                <label for="quartile-select">¿Qué cuartil quieres ver?</label>
-                <select
-                  id="quartile-select"
-                  aria-describedby="quartile-description"
-                  disabled
-                >
-                  <option value="">Selecciona un cuartil</option>
-                  <option value="1">Q1 · 25 %</option>
-                  <option value="2">Q2 · 50 % (mediana)</option>
-                  <option value="3">Q3 · 75 %</option>
-                  <option value="4">Q4 · 100 % (máximo)</option>
-                </select>
-                <div class="quantile-result">
-                  <span>Valor del cuartil</span>
-                  <output
-                    id="quartile-value"
-                    for="quartile-select"
-                    aria-live="polite"
-                  >
-                    0
-                  </output>
-                </div>
-                <p id="quartile-description" class="field-help">
-                  Selecciona un análisis del historial.
-                </p>
-              </div>
-              <!-- Selección de uno de los diez deciles del análisis actual. -->
-              <div class="decile-section">
-                <label for="decile-select">¿Qué decil quieres ver?</label>
-                <select
-                  id="decile-select"
-                  aria-describedby="decile-description"
-                  disabled
-                >
-                  <option value="">Selecciona un decil</option>
-                  <option value="1">D1 · 10 %</option>
-                  <option value="2">D2 · 20 %</option>
-                  <option value="3">D3 · 30 %</option>
-                  <option value="4">D4 · 40 %</option>
-                  <option value="5">D5 · 50 %</option>
-                  <option value="6">D6 · 60 %</option>
-                  <option value="7">D7 · 70 %</option>
-                  <option value="8">D8 · 80 %</option>
-                  <option value="9">D9 · 90 %</option>
-                  <option value="10">D10 · 100 %</option>
-                </select>
-                <div class="quantile-result">
-                  <span>Valor del decil</span>
-                  <output
-                    id="decile-value"
-                    for="decile-select"
-                    aria-live="polite"
-                  >
-                    0
-                  </output>
-                </div>
-                <p id="decile-description" class="field-help">
-                  Selecciona un análisis del historial.
-                </p>
-              </div>
+            <!-- Tabla ubicada junto al selector de gráficas. -->
+            <article class="card frequency-card">
+              <h2>Tabla de frecuencia agrupada</h2>
+              <div id="grouped-table" class="frequency-table-scroll"></div>
+              <p class="field-help">
+                xi: marca de clase · fi: frecuencia absoluta · Fi: acumulada ·
+                hi: relativa · Hi: relativa acumulada.
+              </p>
+              <p class="field-help">
+                Intervalos [Li, Ls): incluyen el límite inferior y excluyen el
+                superior. La última clase también incluye Xmax. Los porcentajes
+                mostrados pueden tener diferencias mínimas por redondeo.
+              </p>
             </article>
           </section>
+          <article class="card distribution">
+            <span class="eyebrow">MÁS ALLÁ DEL PROMEDIO</span>
+            <h2>Distribución en detalle</h2>
+            <!-- Aquí se insertan cuartiles, varianzas, rango y otros resultados calculados. -->
+            <div id="detail-stats"></div>
+            <!-- Consulta individual de los cuartiles del análisis seleccionado. -->
+            <div class="quartile-section">
+              <label for="quartile-select">¿Qué cuartil quieres ver?</label>
+              <select
+                id="quartile-select"
+                aria-describedby="quartile-description"
+                disabled
+              >
+                <option value="">Selecciona un cuartil</option>
+                <option value="1">Q1 · 25 %</option>
+                <option value="2">Q2 · 50 % (mediana)</option>
+                <option value="3">Q3 · 75 %</option>
+                <option value="4">Q4 · 100 % (máximo)</option>
+              </select>
+              <div class="quantile-result">
+                <span>Valor del cuartil</span>
+                <output
+                  id="quartile-value"
+                  for="quartile-select"
+                  aria-live="polite"
+                >
+                  0
+                </output>
+              </div>
+              <p id="quartile-description" class="field-help">
+                Selecciona un análisis del historial.
+              </p>
+            </div>
+            <!-- Selección de uno de los diez deciles del análisis actual. -->
+            <div class="decile-section">
+              <label for="decile-select">¿Qué decil quieres ver?</label>
+              <select
+                id="decile-select"
+                aria-describedby="decile-description"
+                disabled
+              >
+                <option value="">Selecciona un decil</option>
+                <option value="1">D1 · 10 %</option>
+                <option value="2">D2 · 20 %</option>
+                <option value="3">D3 · 30 %</option>
+                <option value="4">D4 · 40 %</option>
+                <option value="5">D5 · 50 %</option>
+                <option value="6">D6 · 60 %</option>
+                <option value="7">D7 · 70 %</option>
+                <option value="8">D8 · 80 %</option>
+                <option value="9">D9 · 90 %</option>
+                <option value="10">D10 · 100 %</option>
+              </select>
+              <div class="quantile-result">
+                <span>Valor del decil</span>
+                <output
+                  id="decile-value"
+                  for="decile-select"
+                  aria-live="polite"
+                >
+                  0
+                </output>
+              </div>
+              <p id="decile-description" class="field-help">
+                Selecciona un análisis del historial.
+              </p>
+            </div>
+          </article>
           <article class="card observations">
             <div class="card-heading">
               <div>

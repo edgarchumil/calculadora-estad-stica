@@ -8,6 +8,7 @@ import {
   statistics,
   validateDatasetName,
   frequencyDistribution,
+  groupedSummary,
   boxPlotSummary,
   decile,
 } from "/stats.js";
@@ -171,13 +172,10 @@ if ($("dashboard")) {
     });
     let lo = Math.min(s.min, s.intercept, s.intercept + s.slope * (s.n - 1)),
       hi = Math.max(s.max, s.intercept, s.intercept + s.slope * (s.n - 1));
-    // Agrupa el histograma en intervalos iguales; si todos los valores coinciden, usa un solo grupo.
-    const binCount =
-        s.min === s.max ? 1 : Math.min(20, Math.ceil(Math.sqrt(s.n))),
-      bins = Array(binCount).fill(0),
-      step = (s.max - s.min) / binCount || 1;
-    for (const v of values)
-      bins[Math.min(binCount - 1, Math.floor((v - s.min) / step))]++;
+    // Usa exactamente los intervalos de Sturges de la tabla agrupada.
+    const grouped = frequencyDistribution(values);
+    const bins = grouped.map((bin) => bin.count),
+      binCount = grouped.length;
     if (chartType === "histogram") {
       lo = 0;
       hi = Math.max(...bins) * 1.15;
@@ -289,7 +287,7 @@ if ($("dashboard")) {
           svgNode(
             "title",
             {},
-            `${format(s.min + i * step)} a ${format(s.min + (i + 1) * step)}: ${count} datos`,
+            `${format(grouped[i].lower)} a ${format(grouped[i].upper)}: ${count} datos`,
           ),
         );
         svg.append(bar);
@@ -612,6 +610,93 @@ if ($("dashboard")) {
         : "Elige el decil que deseas consultar, del D1 al D10.";
   }
 
+  // Generalidades y frecuencias calculadas con los valores originales, sin redondearlos antes.
+  function renderGroupedData() {
+    const g = groupedSummary(current ? values : []);
+    $("general-stats").replaceChildren();
+    for (const [label, value] of [
+      ["Total de datos · n", g.n],
+      ["Valor mínimo · Xmin", g.min],
+      ["Valor máximo · Xmax", g.max],
+      ["Rango · R", g.range],
+      ["Rango medio", g.midrange],
+      ["Intervalos · K", g.k],
+      ["Amplitud · A", g.amplitude],
+    ]) {
+      const item = node("div", undefined, "general-stat");
+      item.append(node("span", label), node("strong", format(value)));
+      $("general-stats").append(item);
+    }
+    $("sturges-note").textContent = !g.n
+      ? "Selecciona un análisis del historial para calcular las generalidades."
+      : g.range === 0
+        ? `Sturges propone K = ${g.sturgesK}. Como todos los valores coinciden, se utiliza una sola clase puntual (K = 1, A = 0).`
+        : `K = ⌈1 + log₂(${g.n})⌉ = ${g.k}. R = Xmax − Xmin. Rango medio = (Xmin + Xmax) / 2. A = R / K = ${format(g.amplitude)}.`;
+    const bins = frequencyDistribution(current ? values : []);
+    const table = node("table"),
+      head = node("thead"),
+      header = node("tr"),
+      body = node("tbody");
+    for (const [label, title] of [
+      ["Clase", "Número de clase"],
+      ["Intervalo", "Límites inferior y superior"],
+      ["xi", "Marca de clase"],
+      ["fi", "Frecuencia absoluta"],
+      ["Fi", "Frecuencia absoluta acumulada"],
+      ["hi", "Frecuencia relativa"],
+      ["Hi", "Frecuencia relativa acumulada"],
+      ["%", "Porcentaje de la clase"],
+    ]) {
+      const th = node("th", label);
+      th.scope = "col";
+      th.title = title;
+      header.append(th);
+    }
+    head.append(header);
+    bins.forEach((bin, i) => {
+      const row = node("tr");
+      const interval = `[${format(bin.lower)}, ${format(bin.upper)}${i === bins.length - 1 ? "]" : ")"}`;
+      for (const value of [
+        i + 1,
+        interval,
+        format(bin.midpoint),
+        bin.count,
+        bin.cumulative,
+        format(bin.relative),
+        format(bin.cumulativeRelative),
+        format(bin.relative * 100) + " %",
+      ])
+        row.append(node("td", String(value)));
+      body.append(row);
+    });
+    if (!bins.length) {
+      const row = node("tr"),
+        cell = node(
+          "td",
+          "Selecciona un análisis para ver su tabla de frecuencia.",
+        );
+      cell.colSpan = 8;
+      row.append(cell);
+      body.append(row);
+    }
+    const foot = node("tfoot"),
+      total = node("tr");
+    for (const value of [
+      "Total",
+      "—",
+      "—",
+      g.n,
+      g.n,
+      g.n ? "1" : "0",
+      g.n ? "1" : "0",
+      g.n ? "100 %" : "0 %",
+    ])
+      total.append(node("td", String(value)));
+    foot.append(total);
+    table.append(head, body, foot);
+    $("grouped-table").replaceChildren(table);
+  }
+
   // Recalcula y actualiza tarjetas, distribución, tabla y gráfico para el conjunto seleccionado.
   function render() {
     // Ceros de presentación mientras no se elija un análisis; no representan una muestra real.
@@ -684,6 +769,7 @@ if ($("dashboard")) {
       );
       $("detail-stats").append(row);
     }
+    renderGroupedData();
     updateQuartile();
     updateDecile();
     const table = node("table"),
