@@ -1,0 +1,1138 @@
+/* Colores y estilos generales */
+/* Variables reutilizables: var(--ink), por ejemplo, aplica el color principal del texto. */
+:root {
+  --ink: #18374b;
+  --muted: #647b8b;
+  --teal: #17638f;
+  --violet: #c62e32;
+  --line: #e3e9ef;
+  --paper: #f5f7fa;
+  --nav: #133d59;
+}
+/* box-sizing hace que padding y bordes formen parte del ancho y alto definidos. */
+* {
+  box-sizing: border-box;
+}
+html {
+  scroll-behavior: smooth;
+}
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  font-size: 14px;
+  line-height: 1.55;
+}
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+button,
+a,
+input,
+textarea,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+button {
+  cursor: pointer;
+}
+button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+/* El contorno de foco permite identificar dónde está el teclado al navegar con Tab. */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+summary:focus-visible {
+  outline: 3px solid #b58b3a;
+  outline-offset: 3px;
+}
+/* Respeta el atributo hidden aunque otro selector intente aplicar display:flex o grid. */
+[hidden] {
+  display: none !important;
+}
+.brand {
+  display: flex;
+  gap: 11px;
+  align-items: center;
+  font-size: 30px;
+  font-weight: 750;
+  letter-spacing: -1px;
+}
+.brand-dot {
+  color: #c62e32;
+}
+.brand > span {
+  letter-spacing: -1.3px;
+}
+.eyebrow {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+  color: var(--muted);
+}
+h1,
+h2,
+p {
+  margin-top: 0;
+}
+h2 {
+  font-size: 18px;
+  letter-spacing: -0.4px;
+  margin: 5px 0 18px;
+}
+.muted {
+  color: var(--muted);
+}
+/* Botón de acción principal; los selectores :hover y :disabled describen sus estados. */
+.primary {
+  border: 0;
+  border-radius: 8px;
+  background: #b9262b;
+  color: white;
+  padding: 12px 19px;
+  font-weight: 650;
+  box-shadow: 0 3px 5px #b9262b12;
+}
+.primary:hover {
+  background: #9b2025;
+}
+.secondary {
+  background: white;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 16px;
+}
+.text-button {
+  background: none;
+  border: 0;
+  color: var(--teal);
+  font-weight: 650;
+}
+.wide {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+.badge {
+  font-size: 9px;
+  letter-spacing: 1px;
+  font-weight: 700;
+  border-radius: 5px;
+  padding: 5px 8px;
+  background: #e8f1f7;
+  color: var(--teal);
+}
+label {
+  display: block;
+  font-size: 12px;
+  font-weight: 650;
+  margin: 18px 0 7px;
+}
+label > span {
+  float: right;
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--muted);
+}
+input,
+textarea,
+select {
+  width: 100%;
+  background: white;
+  border: 1px solid #dce4e7;
+  padding: 12px 13px;
+  border-radius: 7px;
+  color: var(--ink);
+}
+input::placeholder,
+textarea::placeholder {
+  color: #9aa7ad;
+}
+textarea {
+  resize: vertical;
+}
+.error,
+.danger {
+  color: #b5354d;
+}
+.error {
+  min-height: 20px;
+  font-size: 12px;
+  margin: 12px 0;
+}
+/* Pantalla de acceso y registro */
+/* Grid divide la pantalla de acceso en dos columnas: escudo y formulario. */
+.auth-layout {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.auth-panel {
+  padding: 65px 10% 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+/* Limita el ancho del formulario; margin:auto lo centra dentro de su panel. */
+.auth-box {
+  max-width: 390px;
+  width: 100%;
+  margin: auto;
+}
+/* Centra el título de acceso o registro sin cambiar la alineación de los campos. */
+.auth-box h2 {
+  text-align: center;
+  font-size: 32px;
+  margin: 24px 0 6px;
+  letter-spacing: -1px;
+}
+.auth-tabs {
+  display: flex;
+  background: #f1f5f5;
+  border-radius: 8px;
+  padding: 4px;
+  margin: 28px 0;
+}
+.auth-tabs button {
+  flex: 1;
+  border: 0;
+  padding: 10px;
+  background: none;
+  border-radius: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+.auth-tabs button.active {
+  background: white;
+  box-shadow: 0 2px 5px #18374b10;
+  color: var(--ink);
+}
+/* El contenedor relativo permite colocar el botón Ver dentro del campo con posición absoluta. */
+.password-wrap {
+  position: relative;
+}
+.password-wrap input {
+  padding-right: 55px;
+}
+.password-wrap button {
+  position: absolute;
+  right: 10px;
+  top: 12px;
+  border: 0;
+  background: none;
+  font-size: 11px;
+  color: var(--teal);
+}
+.auth-note {
+  text-align: center;
+  color: var(--muted);
+  font-size: 10px;
+  margin: 20px 0 27px;
+}
+.first-time {
+  border-top: 1px solid var(--line);
+  padding-top: 22px;
+  font-size: 12px;
+}
+.first-time p {
+  color: var(--muted);
+  margin-top: 5px;
+  font-size: 11px;
+}
+.auth-panel footer {
+  text-align: center;
+  color: #96a2a7;
+  font-size: 10px;
+  margin-top: 35px;
+}
+/* Dashboard: navegación, datos y gráficos */
+.dashboard-page {
+  background: var(--paper);
+}
+/* Estructura del dashboard: columna lateral y contenido flexible con minmax(0,1fr). */
+.app-shell {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  min-height: 100vh;
+}
+/* Navegación fija en escritorio; las reglas móviles la convierten en una barra superior. */
+.sidebar {
+  background: var(--nav);
+  padding: 30px 21px;
+  display: flex;
+  flex-direction: column;
+  color: #b9cedc;
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: 220px;
+}
+.sidebar .brand {
+  color: white;
+  margin: 0 8px 46px;
+}
+.nav-caption {
+  font-size: 8px;
+  letter-spacing: 1.4px;
+  margin: 0 12px 14px;
+}
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 12px 14px;
+  margin-bottom: 6px;
+  border-radius: 7px;
+  font-size: 12px;
+  background: none;
+  border: 0;
+  color: inherit;
+  text-align: left;
+  width: 100%;
+}
+.nav-link.active {
+  background: #205777;
+  color: #ffffff;
+}
+.nav-link:hover {
+  background: #ffffff09;
+}
+.sidebar-bottom {
+  margin-top: auto;
+}
+.tip {
+  border: 1px solid #ffffff12;
+  background: #ffffff04;
+  border-radius: 9px;
+  padding: 15px;
+  margin-bottom: 20px;
+  font-size: 11px;
+}
+.tip > span {
+  display: block;
+  color: #e2c487;
+  font-size: 22px;
+  margin-bottom: 12px;
+}
+.tip strong {
+  color: #f3f7fb;
+  font-size: 11px;
+}
+.tip p {
+  font-size: 10px;
+  margin: 6px 0 0;
+}
+.main-content {
+  grid-column: 2;
+  padding: 0 36px;
+  max-width: 1600px;
+  width: 100%;
+  min-height: 100dvh;
+  margin: 0 auto;
+  align-self: start;
+}
+.topbar {
+  height: 78px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  font-size: 10px;
+  color: var(--muted);
+}
+.topbar strong {
+  color: var(--ink);
+  font-weight: 500;
+}
+.slash {
+  margin: 0 14px;
+  color: #bcc8cb;
+}
+/* Menú anclado al perfil: al abrirlo no desplaza el encabezado. */
+.user-account {
+  position: relative;
+}
+.user-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  list-style: none;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+.user-toggle::-webkit-details-marker {
+  display: none;
+}
+.account-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #e2edf5;
+  color: var(--teal);
+}
+.user-menu-options {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  min-width: 160px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: white;
+  box-shadow: 0 8px 24px #18374b20;
+  z-index: 20;
+}
+.user-menu-options .logout-button {
+  width: 100%;
+  padding: 10px 12px;
+  text-align: left;
+  border-radius: 5px;
+}
+.user-menu-options .logout-button:hover {
+  background: var(--paper);
+}
+.logout-button {
+  border: 0;
+  padding: 2px 0;
+  background: transparent;
+  color: var(--teal);
+  font-size: 11px;
+  font-weight: 600;
+}
+.logout-button:hover {
+  text-decoration: underline;
+}
+.user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink);
+}
+.avatar {
+  width: 30px;
+  height: 30px;
+  background: #e2edf5;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  font-weight: 700;
+}
+.status-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: #1d719f;
+  border-radius: 50%;
+}
+.page-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 32px 0 24px;
+}
+.page-heading h1 {
+  font-size: 29px;
+  line-height: 1.3;
+  letter-spacing: -1px;
+  margin: 9px 0;
+}
+.page-heading p {
+  font-size: 12px;
+  margin-bottom: 0;
+}
+.page-heading .primary {
+  font-size: 11px;
+  white-space: nowrap;
+}
+.dataset-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+  gap: 15px;
+}
+.dataset-toolbar > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+}
+.select-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 10px;
+  color: var(--muted);
+  margin: 0;
+}
+.select-label select {
+  padding: 6px 10px;
+  width: 180px;
+  font-size: 11px;
+}
+/* Cuatro tarjetas en escritorio; la consulta móvil reduce la distribución a dos columnas. */
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 22px;
+}
+.metric {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: white;
+  padding: 18px 20px;
+}
+.metric-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: var(--muted);
+}
+.metric-icon {
+  width: 28px;
+  height: 28px;
+  background: #e8f1f7;
+  border-radius: 7px;
+  color: var(--teal);
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+}
+.metric:nth-child(2) .metric-icon {
+  background: #fbecee;
+  color: #c62e32;
+}
+.metric:nth-child(3) .metric-icon {
+  background: #faf3e5;
+  color: #916b26;
+}
+.metric-value {
+  font-size: 30px;
+  letter-spacing: -1px;
+  font-weight: 650;
+  display: block;
+  margin: 10px 0 4px;
+  overflow-wrap: anywhere;
+  line-height: 1.2;
+}
+.metric small {
+  font-size: 10px;
+  color: var(--muted);
+}
+.card {
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: white;
+  padding: 23px;
+  min-width: 0;
+}
+/* Distribuye gráfico y resumen estadístico en columnas de distinta proporción. */
+.analysis-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.9fr) minmax(250px, 1fr);
+  gap: 20px;
+  margin-bottom: 20px;
+  scroll-margin-top: 20px;
+}
+.card-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.card-heading h2 {
+  margin-bottom: 12px;
+}
+.segmented {
+  display: flex;
+  background: #f4f6f8;
+  padding: 3px;
+  border-radius: 6px;
+  align-self: flex-start;
+}
+.segmented button {
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 9px;
+  padding: 6px 9px;
+  border-radius: 4px;
+}
+.segmented button.active {
+  background: white;
+  box-shadow: 0 1px 4px #0001;
+  color: var(--ink);
+}
+.chart {
+  height: 230px;
+  margin-top: 12px;
+}
+/* El SVG conserva su viewBox y se adapta al tamaño disponible sin redibujar sus coordenadas. */
+.chart svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.chart-foot {
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: var(--muted);
+  gap: 10px;
+}
+.legend {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin: 0 4px 0 8px;
+}
+.teal {
+  background: var(--teal);
+}
+.purple {
+  background: var(--violet);
+}
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #f0f3f4;
+  padding: 9px 0;
+  font-size: 11px;
+  gap: 12px;
+}
+.stat-row span {
+  color: var(--muted);
+}
+.insight {
+  display: flex;
+  gap: 10px;
+  background: #faf3e5;
+  border-radius: 7px;
+  padding: 12px;
+  margin-top: 16px;
+  color: #785c27;
+  font-size: 10px;
+}
+.insight p {
+  margin: 0;
+}
+/* Distribuye el formulario y las observaciones; en móviles se apilan. */
+.bottom-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 20px;
+  scroll-margin-top: 20px;
+}
+.bottom-grid label {
+  font-size: 10px;
+  margin-top: 13px;
+}
+.bottom-grid input,
+.bottom-grid textarea {
+  font-size: 11px;
+  padding: 10px;
+}
+.field-help {
+  font-size: 9px;
+  color: var(--muted);
+  margin: 6px 0 16px;
+}
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.form-actions button {
+  font-size: 10px;
+  padding: 10px 13px;
+}
+#data-message {
+  font-size: 11px;
+  margin: 12px 0 0;
+}
+/* Limita la altura de las filas y habilita desplazamiento dentro del contenedor. */
+.table-scroll {
+  height: 252px;
+  overflow: auto;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  text-align: left;
+}
+/* Los encabezados permanecen visibles al desplazar la tabla gracias a position:sticky. */
+th {
+  font-weight: 500;
+  color: var(--muted);
+  background: #f7f9fa;
+  position: sticky;
+  top: 0;
+}
+td,
+th {
+  padding: 9px 13px;
+  border-bottom: 1px solid #eef2f3;
+}
+td:last-child {
+  text-align: right;
+}
+th:last-child {
+  text-align: right;
+}
+.observation-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: var(--muted);
+  padding-top: 16px;
+}
+.observation-footer button {
+  font-size: 9px;
+}
+.methodology {
+  font-size: 11px;
+  color: var(--muted);
+  padding: 23px 0 10px;
+}
+.methodology summary {
+  cursor: pointer;
+}
+.methodology p {
+  margin-top: 12px;
+  max-width: 900px;
+}
+footer {
+  font-size: 9px;
+  color: #8c9ba3;
+  padding: 20px 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+.loading {
+  padding: 70px;
+  text-align: center;
+}
+/* Notificación flotante independiente del flujo del documento. */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--nav);
+  color: white;
+  padding: 16px 22px;
+  border-radius: 9px;
+  box-shadow: 0 6px 30px #0002;
+  max-width: 90vw;
+  font-size: 12px;
+}
+/* Adaptación a pantallas grandes, tabletas y móviles */
+@media (min-width: 1500px) {
+  .main-content {
+    padding: 0 55px;
+  }
+  .chart {
+    height: 280px;
+  }
+}
+/* Tabletas y pantallas medianas: reduce la barra lateral y apila el área de análisis. */
+@media (max-width: 1100px) {
+  .sidebar {
+    width: 180px;
+    padding: 25px 12px;
+  }
+  .app-shell {
+    grid-template-columns: 180px minmax(0, 1fr);
+  }
+  .main-content {
+    padding: 0 22px;
+  }
+  .analysis-grid {
+    grid-template-columns: 1fr;
+  }
+  .distribution #detail-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 25px;
+  }
+  .metrics {
+    gap: 10px;
+  }
+  .metric {
+    padding: 15px;
+  }
+  .metric-value {
+    font-size: 26px;
+  }
+  .bottom-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .page-heading h1 {
+    font-size: 25px;
+  }
+}
+/* Móviles: una columna, navegación superior y controles adaptados al ancho disponible. */
+@media (max-width: 760px) {
+  .auth-layout {
+    grid-template-columns: 1fr;
+  }
+  .auth-panel {
+    padding: 35px 8% 15px;
+  }
+  .auth-box h2 {
+    font-size: 28px;
+  }
+  .sidebar {
+    position: static;
+    width: auto;
+    padding: 14px 20px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .sidebar .brand {
+    font-size: 25px;
+    margin: 0 auto 0 0;
+  }
+  .sidebar .nav-caption,
+  .sidebar > .nav-link,
+  .tip {
+    display: none;
+  }
+  .sidebar-bottom {
+    margin: 0;
+  }
+  .sidebar-bottom .nav-link {
+    margin: 0;
+    padding: 6px;
+    width: auto;
+  }
+  .app-shell {
+    display: block;
+  }
+  .main-content {
+    padding: 0 18px;
+  }
+  .topbar {
+    height: 76px;
+  }
+  .page-heading {
+    padding: 23px 0;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 15px;
+  }
+  .page-heading h1 {
+    font-size: 27px;
+  }
+  .page-heading .eyebrow {
+    font-size: 8px;
+  }
+  .metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .metric-value {
+    font-size: 28px;
+  }
+  .dataset-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .dataset-toolbar .select-label {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .card {
+    padding: 18px;
+  }
+  .card-heading .badge {
+    font-size: 7px;
+  }
+  .analysis-grid,
+  .bottom-grid {
+    grid-template-columns: 1fr;
+  }
+  .card-heading h2 {
+    font-size: 16px;
+  }
+  .card-heading .eyebrow {
+    font-size: 8px;
+  }
+  .chart {
+    height: 215px;
+  }
+  .chart-foot {
+    font-size: 8px;
+  }
+  .distribution #detail-stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 0 15px;
+  }
+  footer {
+    font-size: 8px;
+  }
+  .auth-panel footer {
+    display: block;
+  }
+  .user {
+    font-size: 10px;
+  }
+}
+/* Accesibilidad: respeta la preferencia del sistema de reducir animaciones y desplazamiento suave. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Universidad Mariano Gálvez: azul, rojo y dorado del escudo. */
+.university-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  padding: clamp(28px, 6vw, 90px);
+  border-right: 1px solid var(--line);
+}
+
+/* height:auto conserva la proporción del escudo; object-fit evita deformaciones. */
+.university-logo {
+  display: block;
+  width: 100%;
+  max-width: 470px;
+  height: auto;
+  object-fit: contain;
+}
+
+.primary:hover {
+  background: #9b2025;
+}
+.auth-tabs button.active {
+  color: #17638f;
+}
+.sidebar {
+  border-top: 4px solid #b58b3a;
+}
+.nav-link.active {
+  box-shadow: inset 3px 0 #d5ae5b;
+}
+.legend.teal {
+  background: #1d719f;
+}
+.legend.purple {
+  background: #c62e32;
+}
+@media (max-width: 760px) {
+  .university-panel {
+    padding: 28px 20px;
+    border-right: 0;
+    border-bottom: 3px solid #b58b3a;
+  }
+  .university-logo {
+    max-width: 180px;
+  }
+  .auth-panel {
+    padding-top: 28px;
+  }
+  .sidebar {
+    border-top: 3px solid #b58b3a;
+  }
+}
+
+/* Vistas independientes y listado del historial. El atributo hidden oculta las demás. */
+/* Centra la tarjeta del formulario en el área principal, sin centrar los campos. */
+.entry-view {
+  width: 100%;
+  max-width: 850px;
+  margin-inline: auto;
+}
+.entry-view .form-actions {
+  justify-content: flex-end;
+}
+#analysis-content > .observations {
+  margin-top: 20px;
+}
+.history-card {
+  margin-bottom: 24px;
+}
+.history-list {
+  display: grid;
+  gap: 12px;
+}
+.history-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+}
+.history-name {
+  border: 0;
+  background: transparent;
+  color: var(--teal);
+  font-weight: 700;
+  font-size: 15px;
+  text-align: left;
+  padding: 0;
+  overflow-wrap: anywhere;
+}
+.history-name:hover {
+  text-decoration: underline;
+}
+.history-meta {
+  color: var(--muted);
+  font-size: 11px;
+  margin: 5px 0 0;
+}
+.history-hint {
+  border: 0;
+  background: transparent;
+  padding: 8px 0 8px 8px;
+  color: var(--teal);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.empty-state {
+  padding: 35px;
+}
+.empty-state p {
+  color: var(--muted);
+}
+.empty-state .primary {
+  display: inline-block;
+  margin-top: 10px;
+}
+/* Conserva acceso a las tres vistas desde teléfonos. */
+@media (max-width: 760px) {
+  .sidebar > .nav-link {
+    display: flex;
+    width: auto;
+    margin: 0;
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+  .sidebar .brand {
+    width: 100%;
+  }
+  .sidebar-bottom {
+    margin-left: auto;
+  }
+  .sidebar-bottom .nav-link span {
+    display: none;
+  }
+  .history-item {
+    align-items: flex-start;
+  }
+  .empty-state {
+    padding: 24px;
+  }
+}
+
+/* Perfil en la cabecera del panel lateral; el nombre puede ocupar varias líneas. */
+.sidebar-profile {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  align-items: center;
+  gap: 12px;
+  color: white;
+  padding: 0 8px;
+  margin-bottom: 40px;
+  font-size: 21px;
+  font-weight: 700;
+}
+.sidebar-profile-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 42px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #ffffff18;
+  color: #e2c487;
+}
+#sidebar-user-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 760px) {
+  .sidebar-profile {
+    width: 100%;
+    margin-bottom: 8px;
+    padding: 0;
+    font-size: 19px;
+  }
+}
+
+/* El contenido corto no centra verticalmente el encabezado dentro del grid. */
+.workspace-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--paper);
+}
+/* Reserva la misma altura incluso si Nuevo ingreso está oculto en el formulario. */
+.workspace-header .page-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  min-height: 112px;
+}
+@media (max-width: 760px) {
+  .workspace-header .page-heading {
+    gap: 12px;
+    padding: 20px 0;
+  }
+  .workspace-header .page-heading h1 {
+    font-size: 23px;
+  }
+}
+
+.history-hint:hover { text-decoration: underline; }
+
+/* Presentación académica debajo del escudo, adaptable a pantallas pequeñas. */
+.student-info {
+  max-width: 470px;
+  text-align: center;
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.student-info p { margin: 0 0 6px; }
+.student-info strong { color: var(--teal); }

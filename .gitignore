@@ -1,0 +1,11 @@
+data/
+dist/
+*.sqlite*
+.DS_Store
+.sites-runtime/
+node_modules/
+.env
+.env.*
+!.env.example
+coverage/
+*.log

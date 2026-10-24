@@ -1,0 +1,19 @@
+# Este Blueprint crea recursos de pago para conservar SQLite entre despliegues.
+services:
+  - type: web
+    name: estadia
+    runtime: node
+    plan: starter
+    numInstances: 1
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DB_PATH
+        value: /var/data/estadia.sqlite
+    disk:
+      name: estadia-data
+      mountPath: /var/data
+      sizeGB: 1

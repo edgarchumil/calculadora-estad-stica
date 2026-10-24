@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="es">
+  <!-- Configuración y recursos compartidos con la pantalla de acceso. -->
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Dashboard · Estadia</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script type="module" src="/app.js"></script>
+  </head>
+  <body class="dashboard-page">
+    <!-- Estado inicial visible mientras se comprueba la sesión y se cargan los datos. -->
+    <div id="loading" class="loading">Preparando tu espacio…</div>
+    <!-- app.js retira hidden tras cargar la cuenta. La API protege los datos en el servidor. -->
+    <div id="dashboard" class="app-shell" hidden>
+      <!-- Navegación lateral: los enlaces # apuntan a secciones de esta misma página. -->
+      <aside class="sidebar">
+        <!-- Perfil de la cuenta autenticada, cargado desde /api/me. -->
+        <a
+          href="#overview"
+          class="sidebar-profile"
+          aria-label="Ir a vista general"
+        >
+          <span class="sidebar-profile-icon" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              width="24"
+              height="24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="8" r="4"></circle>
+              <path d="M4 21v-2a8 8 0 0 1 16 0v2"></path>
+            </svg>
+          </span>
+          <span id="sidebar-user-name"></span>
+        </a>
+        <span class="nav-caption">OPCIONES</span>
+        <a class="nav-link active" data-view="overview" href="#overview">
+          ◫
+          <span>Vista general</span>
+        </a>
+        <a class="nav-link" data-view="data-entry" href="#data-entry">
+          ⊞
+          <span>Ingreso de datos</span>
+        </a>
+        <a class="nav-link" data-view="history" href="#history">
+          ⌁
+          <span>Visualizaciones</span>
+        </a>
+      </aside>
+      <!-- Contenido principal del espacio estadístico. -->
+      <main class="main-content">
+        <!-- Encabezado compartido: conserva su posición en las tres vistas y al desplazarse. -->
+        <div class="workspace-header">
+          <!-- Nombre y avatar se completan con la respuesta de /api/me. -->
+          <header class="topbar">
+            <!-- Menú de cuenta: summary permite abrirlo con clic, Enter o barra espaciadora. -->
+            <details class="user-account" id="user-menu">
+              <summary class="user-toggle" id="user-menu-toggle">
+                <span class="account-icon" aria-hidden="true">
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="22"
+                    height="22"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <circle cx="12" cy="8" r="4"></circle>
+                    <path d="M4 21v-2a8 8 0 0 1 16 0v2"></path>
+                  </svg>
+                </span>
+                <span id="user-name"></span>
+              </summary>
+              <div class="user-menu-options">
+                <button id="logout" class="logout-button" type="button">
+                  ↪ Cerrar sesión
+                </button>
+              </div>
+            </details>
+          </header>
+          <!-- Cada vista presenta únicamente su título, sin textos decorativos. -->
+          <section class="page-heading">
+            <h1 id="view-title">Dashboard</h1>
+            <button id="new-analysis" class="primary" type="button">
+              ＋ Nuevo ingreso
+            </button>
+          </section>
+        </div>
+        <!-- Solo una vista permanece visible. app.js actualiza la navegación por hash. -->
+        <section id="overview-view" aria-label="Vista general">
+          <div id="overview-analysis"></div>
+        </section>
+
+        <!-- El formulario pertenece únicamente a Ingreso de datos. -->
+        <section
+          id="entry-view"
+          class="entry-view"
+          aria-label="Ingreso de datos"
+          hidden
+        >
+          <article class="card">
+            <div class="card-heading">
+              <div>
+                <h2>Ingresa tus datos</h2>
+              </div>
+              <span class="badge">MÁXIMO 50 VALORES</span>
+            </div>
+            <!-- El envío calcula y guarda el conjunto mediante la API. -->
+            <form id="data-form">
+              <label for="dataset-name">Nombre del conjunto</label>
+              <input
+                id="dataset-name"
+                name="name"
+                aria-describedby="dataset-name-help"
+                required
+                minlength="2"
+                maxlength="80"
+                placeholder="Ej. Ventas de octubre"
+              />
+              <p id="dataset-name-help" class="field-help">
+                De 2 a 80 caracteres. Usa letras, números, espacios y signos
+                habituales; no etiquetas HTML.
+              </p>
+              <label for="values">Valores numéricos</label>
+              <textarea
+                id="values"
+                name="values"
+                rows="4"
+                required
+                maxlength="2000"
+                aria-describedby="values-help values-count"
+                placeholder="12, 18, 24, 24, 32, 38…"
+              ></textarea>
+              <p class="field-help" id="values-help">
+                Separa con comas, espacios o saltos de línea. Usa punto para
+                decimales.
+              </p>
+              <p id="values-count" class="field-help" role="status">
+                0 de 50 datos
+              </p>
+              <div class="form-actions">
+                <button class="primary" id="calculate">
+                  Calcular y guardar →
+                </button>
+              </div>
+              <p id="data-message" role="status"></p>
+            </form>
+          </article>
+        </section>
+
+        <!-- El historial lista los conjuntos privados del usuario por nombre y fecha. -->
+        <section
+          id="history-view"
+          aria-label="Historial de ingreso de datos"
+          hidden
+        >
+          <article class="card history-card">
+            <div class="card-heading">
+              <div>
+                <h2>Historial de ingreso de datos</h2>
+              </div>
+              <span id="history-count" class="badge"></span>
+            </div>
+            <p class="muted">
+              Selecciona un nombre para visualizar sus datos y estadísticas.
+            </p>
+            <div id="history-list" class="history-list"></div>
+          </article>
+        </section>
+
+        <!-- El dashboard inicia en cero y muestra el análisis elegido desde el historial. -->
+        <div id="analysis-content" hidden>
+          <!-- Contenedor vacío: app.js genera aquí las tarjetas de media, mediana, moda y cantidad. -->
+          <div class="metrics" id="metrics"></div>
+          <!-- Área de visualizaciones: alterna entre serie e histograma mediante app.js. -->
+          <section class="analysis-grid" id="charts-section">
+            <article class="card chart-card">
+              <div class="card-heading">
+                <div>
+                  <span class="eyebrow">CADA OBSERVACIÓN CUENTA</span>
+                  <h2 id="chart-title">Comportamiento de los datos</h2>
+                </div>
+                <div class="segmented">
+                  <button class="active" id="line-chart">Serie</button>
+                  <button id="histogram">Histograma</button>
+                </div>
+              </div>
+              <div
+                id="chart"
+                class="chart"
+                role="img"
+                aria-label="Gráfico de los datos"
+              ></div>
+              <div class="chart-foot">
+                <span>
+                  <i class="legend teal"></i>
+                  Observaciones
+                  <i class="legend purple"></i>
+                  Tendencia lineal
+                </span>
+                <span id="chart-count"></span>
+              </div>
+            </article>
+            <article class="card distribution">
+              <span class="eyebrow">MÁS ALLÁ DEL PROMEDIO</span>
+              <h2>Distribución en detalle</h2>
+              <!-- Aquí se insertan cuartiles, varianzas, rango y otros resultados calculados. -->
+              <div id="detail-stats"></div>
+            </article>
+          </section>
+          <article class="card observations">
+            <div class="card-heading">
+              <div>
+                <span class="eyebrow">TUS NÚMEROS, SIN FILTROS</span>
+                <h2>Datos ordenados</h2>
+              </div>
+            </div>
+            <!-- La tabla muestra los valores de menor a mayor sin modificar el orden original del conjunto. -->
+            <div id="data-table" class="table-scroll"></div>
+            <div class="observation-footer">
+              <span id="table-count"></span>
+              <button class="danger text-button" id="delete-dataset" hidden>
+                Eliminar conjunto
+              </button>
+            </div>
+          </article>
+        </div>
+      </main>
+    </div>
+    <!-- Notificación temporal; role=status informa cambios sin interrumpir al usuario. -->
+    <div id="toast" class="toast" role="status" hidden></div>
+  </body>
+</html>

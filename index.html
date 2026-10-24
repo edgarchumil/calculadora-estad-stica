@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="es">
+  <!-- Configuración de la página: codificación, adaptación móvil, estilos y JavaScript. -->
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      name="description"
+      content="Tu laboratorio de estadística: analiza, visualiza y comprende tus datos."
+    />
+    <title>Iniciar sesión</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <!-- El módulo se ejecuta después de analizar el HTML y puede importar stats.js. -->
+    <script type="module" src="/app.js"></script>
+  </head>
+  <body class="auth-page">
+    <main class="auth-layout">
+      <!-- Escudo de la universidad y presentación del estudiante y su proyecto. -->
+      <section
+        class="university-panel"
+        aria-label="Universidad Mariano Gálvez de Guatemala"
+      >
+        <img
+          class="university-logo"
+          src="/assets/umg-logo.webp"
+          alt="Escudo de la Universidad Mariano Gálvez de Guatemala"
+          width="3840"
+          height="3842"
+        />
+        <div class="student-info">
+          <p><strong>Estudiante:</strong> Edy Armando Bocel Ibaté</p>
+          <p><strong>Carné:</strong> 2290-25-23299</p>
+          <p><strong>Proyecto:</strong> Calculadora de Estadística</p>
+        </div>
+      </section>
+      <!-- Panel de acceso. Los id permiten que app.js encuentre y actualice los elementos. -->
+      <section class="auth-panel">
+        <div class="auth-box">
+          <h2 id="auth-title">INICIAR SESION</h2>
+          <!-- Estas pestañas cambian entre iniciar sesión y crear una cuenta sin abrir otra página. -->
+          <div class="auth-tabs" role="group" aria-label="Acceso">
+            <button class="active" id="login-tab" type="button">
+              Iniciar sesión
+            </button>
+            <button id="register-tab" type="button">Crear cuenta</button>
+          </div>
+          <!-- required, type, minlength y maxlength validan en el navegador. La API vuelve a validar. -->
+          <form id="auth-form">
+            <!-- El nombre solo se solicita al registrarse; app.js cambia hidden y required. -->
+            <div id="name-field" hidden>
+              <label for="name">Nombre</label>
+              <input
+                id="name"
+                name="name"
+                autocomplete="name"
+                minlength="2"
+                maxlength="60"
+                placeholder="Tu nombre"
+              />
+            </div>
+            <label for="email">Correo electrónico</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              required
+              maxlength="254"
+              autocomplete="email"
+              placeholder="tu@correo.com"
+            />
+            <label for="password">
+              Contraseña
+              <span>12 caracteres como mínimo</span>
+            </label>
+            <!-- El botón Ver tiene type=button para mostrar la contraseña sin enviar el formulario. -->
+            <div class="password-wrap">
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                minlength="12"
+                maxlength="128"
+                autocomplete="current-password"
+                placeholder="Ingresa tu contraseña"
+              />
+              <button
+                id="show-password"
+                type="button"
+                aria-label="Mostrar contraseña"
+              >
+                Ver
+              </button>
+            </div>
+            <!-- role=alert anuncia errores a lectores de pantalla. -->
+            <p id="auth-error" class="error" role="alert"></p>
+            <!-- Sin type explícito, este botón envía el formulario. app.js intercepta el envío. -->
+            <button class="primary wide" id="auth-submit">
+              Entrar a mi espacio
+              <span>→</span>
+            </button>
+          </form>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
