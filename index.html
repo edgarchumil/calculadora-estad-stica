@@ -28,52 +28,101 @@
           height="3842"
         />
         <div class="student-info">
-          <p><strong>Estudiante:</strong> Edy Armando Bocel Ibaté</p>
-          <p><strong>Carné:</strong> 2290-25-23299</p>
-          <p><strong>Proyecto:</strong> Calculadora de Estadística</p>
+          <p>
+            <strong>Estudiante:</strong>
+            Edy Armando Bocel Ibaté
+          </p>
+          <p>
+            <strong>Carné:</strong>
+            2290-25-23299
+          </p>
+          <p>
+            <strong>Proyecto:</strong>
+            Calculadora de Estadística
+          </p>
         </div>
       </section>
-      <!-- Panel de acceso. Los id permiten que app.js encuentre y actualice los elementos. -->
-      <section class="auth-panel">
+      <!-- Acceso inspirado en la referencia: campos con iconos y registro debajo. -->
+      <section class="auth-panel" aria-labelledby="auth-title">
         <div class="auth-box">
-          <h2 id="auth-title">INICIAR SESION</h2>
-          <!-- Estas pestañas cambian entre iniciar sesión y crear una cuenta sin abrir otra página. -->
-          <div class="auth-tabs" role="group" aria-label="Acceso">
-            <button class="active" id="login-tab" type="button">
-              Iniciar sesión
-            </button>
-            <button id="register-tab" type="button">Crear cuenta</button>
-          </div>
-          <!-- required, type, minlength y maxlength validan en el navegador. La API vuelve a validar. -->
+          <h1 id="auth-title">Iniciar sesión</h1>
+          <!-- La validación del navegador acompaña las comprobaciones de la API. -->
           <form id="auth-form">
-            <!-- El nombre solo se solicita al registrarse; app.js cambia hidden y required. -->
             <div id="name-field" hidden>
-              <label for="name">Nombre</label>
+              <label class="visually-hidden" for="name">Nombre</label>
+              <div class="auth-field">
+                <span class="auth-field-icon" aria-hidden="true">
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="19"
+                    height="19"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <circle cx="12" cy="8" r="4"></circle>
+                    <path d="M4 21v-2a8 8 0 0 1 16 0v2"></path>
+                  </svg>
+                </span>
+                <input
+                  id="name"
+                  name="name"
+                  autocomplete="name"
+                  minlength="2"
+                  maxlength="60"
+                  placeholder="Tu nombre"
+                />
+              </div>
+            </div>
+            <label class="visually-hidden" for="email">
+              Correo electrónico
+            </label>
+            <div class="auth-field">
+              <span class="auth-field-icon" aria-hidden="true">
+                <svg
+                  viewBox="0 0 24 24"
+                  width="19"
+                  height="19"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+                  <path d="m3 6 9 7 9-7"></path>
+                </svg>
+              </span>
               <input
-                id="name"
-                name="name"
-                autocomplete="name"
-                minlength="2"
-                maxlength="60"
-                placeholder="Tu nombre"
+                id="email"
+                name="email"
+                type="email"
+                required
+                maxlength="254"
+                autocomplete="email"
+                placeholder="Correo electrónico"
               />
             </div>
-            <label for="email">Correo electrónico</label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              maxlength="254"
-              autocomplete="email"
-              placeholder="tu@correo.com"
-            />
-            <label for="password">
-              Contraseña
-              <span>12 caracteres como mínimo</span>
-            </label>
-            <!-- El botón Ver tiene type=button para mostrar la contraseña sin enviar el formulario. -->
-            <div class="password-wrap">
+            <label class="visually-hidden" for="password">Contraseña</label>
+            <div class="auth-field password-wrap">
+              <span class="auth-field-icon" aria-hidden="true">
+                <svg
+                  viewBox="0 0 24 24"
+                  width="19"
+                  height="19"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="5" y="10" width="14" height="11" rx="2"></rect>
+                  <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+                  <path d="M12 14v3"></path>
+                </svg>
+              </span>
               <input
                 id="password"
                 name="password"
@@ -82,7 +131,8 @@
                 minlength="12"
                 maxlength="128"
                 autocomplete="current-password"
-                placeholder="Ingresa tu contraseña"
+                placeholder="Contraseña"
+                aria-describedby="password-help"
               />
               <button
                 id="show-password"
@@ -92,14 +142,21 @@
                 Ver
               </button>
             </div>
-            <!-- role=alert anuncia errores a lectores de pantalla. -->
+            <p id="password-help" class="auth-help">
+              Contraseña de 12 a 128 caracteres.
+            </p>
             <p id="auth-error" class="error" role="alert"></p>
-            <!-- Sin type explícito, este botón envía el formulario. app.js intercepta el envío. -->
-            <button class="primary wide" id="auth-submit">
-              Entrar a mi espacio
-              <span>→</span>
+            <button class="primary wide" id="auth-submit" type="submit">
+              Iniciar sesión
             </button>
           </form>
+          <!-- Ambos botones conservan el flujo de registro y login existente. -->
+          <button id="register-tab" class="auth-switch" type="button">
+            Crear una cuenta
+          </button>
+          <button id="login-tab" class="auth-switch" type="button" hidden>
+            Ya tengo una cuenta
+          </button>
         </div>
       </section>
     </main>

@@ -26,12 +26,12 @@ export function validateDatasetName(value) {
 // Acepta comas, punto y coma, espacios o saltos de línea como separadores.
 // El decimal se escribe con punto; también admite negativos y notación científica.
 export function parseNumbers(text) {
-  if (typeof text !== "string" || text.length > 2000)
-    throw Error("Ingresa como máximo 50 números.");
+  if (typeof text !== "string" || text.length > 4000)
+    throw Error("Ingresa como máximo 100 números.");
   // La expresión regular valida el token completo: evita aceptar parcialmente texto como "12abc".
   const tokens = text.trim().split(/[\s,;]+/);
-  if (tokens.length > 50)
-    throw Error("Solo puedes ingresar un máximo de 50 datos por conjunto.");
+  if (tokens.length > 100)
+    throw Error("Solo puedes ingresar un máximo de 100 datos por conjunto.");
   if (
     !text.trim() ||
     tokens.some((t) => !/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i.test(t))
@@ -54,11 +54,7 @@ export function statistics(values) {
   if (!n) throw Error("Se requiere al menos un dato.");
   // Cuantiles tipo 7: posición (n − 1) × p e interpolación entre los dos vecinos.
   // Para la mediana p=0.5; para Q1 p=0.25 y Q3 p=0.75.
-  const quantile = (p) => {
-    const i = (n - 1) * p,
-      l = Math.floor(i);
-    return sorted[l] + (sorted[Math.ceil(i)] - sorted[l]) * (i - l);
-  };
+  const quantile = (p) => quantileSorted(sorted, p);
   // Media = suma / n. Varianza poblacional = promedio de las distancias al cuadrado respecto a la media.
   const mean = values.reduce((a, b) => a + b, 0) / n;
   const variance = values.reduce((a, b) => a + (b - mean) ** 2, 0) / n;
@@ -106,4 +102,72 @@ export function statistics(values) {
     outliers: values.filter((v) => v < q1 - 1.5 * iqr || v > q3 + 1.5 * iqr),
     sorted,
   };
+}
+
+// Intervalos iguales: sqrt(n) grupos; el extremo derecho del último incluye el máximo.
+// Cada frecuencia relativa es count/n; la suma de los grupos es 1.
+export function frequencyDistribution(values) {
+  const min = Math.min(...values),
+    max = Math.max(...values);
+  if (!values.length) return [];
+  const count =
+    min === max ? 1 : Math.min(20, Math.ceil(Math.sqrt(values.length)));
+  const padding = Math.max(Math.abs(min) * 0.05, 0.5);
+  const start = min === max ? min - padding : min;
+  const width = min === max ? padding * 2 : (max - min) / count;
+  const bins = Array.from({ length: count }, (_, i) => ({
+    lower: start + i * width,
+    upper: i === count - 1 && min !== max ? max : start + (i + 1) * width,
+    midpoint: start + (i + 0.5) * width,
+    count: 0,
+    relative: 0,
+  }));
+  for (const value of values)
+    bins[Math.min(count - 1, Math.max(0, Math.floor((value - start) / width)))]
+      .count++;
+  for (const bin of bins) bin.relative = bin.count / values.length;
+  return bins;
+}
+
+// Bigotes de Tukey: llegan a observaciones reales dentro de las cercas de 1.5×RIC.
+export function boxPlotSummary(values) {
+  const s = statistics(values);
+  const inside = s.sorted.filter(
+    (v) => v >= s.q1 - 1.5 * s.iqr && v <= s.q3 + 1.5 * s.iqr,
+  );
+  return {
+    q1: s.q1,
+    median: s.median,
+    q3: s.q3,
+    lowerWhisker: inside[0],
+    upperWhisker: inside[inside.length - 1],
+    outliers: s.outliers,
+  };
+}
+
+// Interpolación tipo 7, compartida por cuartiles y deciles: posición (n−1)×p.
+function quantileSorted(sorted, probability) {
+  const index = (sorted.length - 1) * probability;
+  const lower = Math.floor(index);
+  return (
+    sorted[lower] + (sorted[Math.ceil(index)] - sorted[lower]) * (index - lower)
+  );
+}
+
+// D1…D9 son puntos de corte internos; D10 representa el percentil 100 (máximo).
+export function decile(values, number) {
+  if (!Number.isInteger(number) || number < 1 || number > 10) {
+    throw Error("Selecciona un decil del 1 al 10.");
+  }
+  if (
+    !Array.isArray(values) ||
+    !values.length ||
+    values.some((v) => typeof v !== "number" || !Number.isFinite(v))
+  ) {
+    throw Error("Selecciona un análisis con datos numéricos válidos.");
+  }
+  return quantileSorted(
+    [...values].sort((a, b) => a - b),
+    number / 10,
+  );
 }

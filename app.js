@@ -3,7 +3,14 @@
  * Este módulo se carga en ambas páginas; comprueba qué elementos existen antes de actuar.
  * La API valida y autoriza cada operación: ocultar controles en pantalla no sustituye esa protección.
  */
-import { parseNumbers, statistics, validateDatasetName } from "/stats.js";
+import {
+  parseNumbers,
+  statistics,
+  validateDatasetName,
+  frequencyDistribution,
+  boxPlotSummary,
+  decile,
+} from "/stats.js";
 // Atajo para buscar un elemento por su atributo id.
 const $ = (id) => document.getElementById(id);
 // Envía JSON a la API. La cookie de sesión viaja automáticamente en el mismo origen.
@@ -50,9 +57,9 @@ if ($("auth-form")) {
         ? "Crea tu cuenta para guardar y explorar tus datos."
         : "Inicia sesión para continuar con tus análisis.";
     }
-    $("auth-submit").textContent = value
-      ? "Crear mi cuenta →"
-      : "Entrar a mi espacio →";
+    $("auth-submit").textContent = value ? "Crear cuenta" : "Iniciar sesión";
+    $("register-tab").hidden = value;
+    $("login-tab").hidden = !value;
     $("login-tab").classList.toggle("active", !value);
     $("register-tab").classList.toggle("active", value);
     $("auth-error").textContent = "";
@@ -98,6 +105,38 @@ if ($("dashboard")) {
     current = null,
     values = [],
     chartType = "line";
+  // Opciones del selector compartido. Cada gráfica utiliza los mismos datos seleccionados.
+  const chartOptions = {
+    line: ["line-chart", "Comportamiento de los datos"],
+    histogram: ["histogram", "Histograma de frecuencias"],
+    "histogram-polygon": [
+      "select-histogram-polygon",
+      "Histograma y polígono de frecuencia",
+    ],
+    "frequency-smooth": [
+      "select-frequency-smooth",
+      "Polígono de frecuencia y suavizado",
+    ],
+    "relative-frequency": [
+      "select-relative-frequency",
+      "Distribución de frecuencia relativa",
+    ],
+    boxplot: ["select-boxplot", "Caja y bigotes"],
+  };
+  function updateChartSelection() {
+    for (const [key, [buttonId]] of Object.entries(chartOptions)) {
+      const selected = key === chartType;
+      $(buttonId).classList.toggle("active", selected);
+      $(buttonId).setAttribute("aria-pressed", String(selected));
+      if (!["line", "histogram"].includes(key))
+        $("panel-" + key).hidden = !selected;
+    }
+    $("chart").hidden = !["line", "histogram"].includes(chartType);
+    $("chart-title").textContent = chartOptions[chartType][1];
+    $("chart-legend").hidden = chartType !== "line";
+    $("chart-count").textContent =
+      `${current ? values.length : 0} observaciones`;
+  }
   let toastTimer;
   let activeView = "overview";
   let historySelection = null;
@@ -158,7 +197,7 @@ if ($("dashboard")) {
           y1: yy,
           x2: W - R,
           y2: yy,
-          stroke: "#e3e9ef",
+          stroke: "var(--chart-grid)",
           "stroke-dasharray": "3 4",
         }),
         svgNode(
@@ -167,7 +206,7 @@ if ($("dashboard")) {
             x: L - 9,
             y: yy + 4,
             "text-anchor": "end",
-            fill: "#647b8b",
+            fill: "var(--chart-label)",
             "font-size": 10,
           },
           format(hi - (i * (hi - lo)) / 4),
@@ -186,14 +225,14 @@ if ($("dashboard")) {
       svg.append(
         svgNode("polygon", {
           points: `${x(0)},${T + h} ${points} ${x(s.n - 1)},${T + h}`,
-          fill: "#e3eff7",
+          fill: "var(--chart-area)",
         }),
       );
       svg.append(
         svgNode("polyline", {
           points,
           fill: "none",
-          stroke: "#1d719f",
+          stroke: "var(--chart-series)",
           "stroke-width": 2.2,
           "stroke-linejoin": "round",
         }),
@@ -204,7 +243,7 @@ if ($("dashboard")) {
           y1: y(s.intercept),
           x2: x(s.n - 1),
           y2: y(s.intercept + s.slope * (s.n - 1)),
-          stroke: "#c62e32",
+          stroke: "var(--chart-accent)",
           "stroke-width": 1.8,
           "stroke-dasharray": "5 5",
         }),
@@ -215,8 +254,8 @@ if ($("dashboard")) {
             cx: x(i),
             cy: y(v),
             r: 3,
-            fill: "white",
-            stroke: "#1d719f",
+            fill: "var(--paper)",
+            stroke: "var(--chart-series)",
             "stroke-width": 1.7,
           });
           c.append(svgNode("title", {}, `Observación ${i + 1}: ${v}`));
@@ -230,7 +269,7 @@ if ($("dashboard")) {
               x: x(i),
               y: H - 12,
               "text-anchor": "middle",
-              fill: "#647b8b",
+              fill: "var(--chart-label)",
               "font-size": 10,
             },
             `Dato ${i + 1}`,
@@ -244,7 +283,7 @@ if ($("dashboard")) {
           width: Math.max(1, w / binCount - 6),
           height: T + h - y(count),
           rx: 4,
-          fill: i % 2 ? "#c62e32" : "#1d719f",
+          fill: i % 2 ? "var(--chart-accent)" : "var(--chart-series)",
         });
         bar.append(
           svgNode(
@@ -258,7 +297,7 @@ if ($("dashboard")) {
       svg.append(
         svgNode(
           "text",
-          { x: L, y: H - 12, fill: "#647b8b", "font-size": 10 },
+          { x: L, y: H - 12, fill: "var(--chart-label)", "font-size": 10 },
           format(s.min),
         ),
         svgNode(
@@ -267,7 +306,7 @@ if ($("dashboard")) {
             x: W - R,
             y: H - 12,
             "text-anchor": "end",
-            fill: "#647b8b",
+            fill: "var(--chart-label)",
             "font-size": 10,
           },
           format(s.max),
@@ -288,6 +327,291 @@ if ($("dashboard")) {
         ? "Vista: 500 puntos · Cálculo: todos los datos"
         : `${s.n} observaciones`;
   }
+  // Genera las cuatro gráficas con los mismos intervalos y cuartiles del análisis.
+  // SVG se crea con nodos y texto, sin inyectar HTML procedente del formulario.
+  function renderAdditionalCharts() {
+    const ids = [
+      "histogram-polygon",
+      "frequency-smooth",
+      "relative-frequency",
+      "boxplot",
+    ];
+    if (!current || !values.length) {
+      for (const id of ids) {
+        $(id).replaceChildren(
+          node("p", "Selecciona un análisis del historial.", "muted"),
+        );
+        $(id).setAttribute("aria-label", "Sin análisis seleccionado");
+      }
+      return;
+    }
+    const bins = frequencyDistribution(values);
+    const W = 680,
+      H = 270,
+      L = 64,
+      R = 22,
+      T = 25,
+      B = 58,
+      w = W - L - R,
+      h = H - T - B;
+    const blue = "var(--chart-series)",
+      red = "var(--chart-accent)";
+    const label = (svg, x, y, text, anchor = "middle") =>
+      svg.append(
+        svgNode(
+          "text",
+          {
+            x,
+            y,
+            "text-anchor": anchor,
+            fill: "var(--chart-label)",
+            "font-size": 11,
+          },
+          text,
+        ),
+      );
+    const line = (svg, x1, y1, x2, y2, color = blue, extra = {}) =>
+      svg.append(
+        svgNode("line", {
+          x1,
+          y1,
+          x2,
+          y2,
+          stroke: color,
+          "stroke-width": 2,
+          ...extra,
+        }),
+      );
+    const makeSvg = () =>
+      svgNode("svg", { viewBox: `0 0 ${W} ${H}`, "aria-hidden": "true" });
+    const mount = (id, svg, description) => {
+      $(id).replaceChildren(svg);
+      $(id).setAttribute("aria-label", description);
+    };
+    const x = (i) => L + ((i + 0.5) * w) / bins.length;
+    for (const id of ids.slice(0, 3)) {
+      const relative = id === "relative-frequency",
+        smooth = id === "frequency-smooth",
+        svg = makeSvg();
+      const peak = Math.max(
+        ...bins.map((b) => (relative ? b.relative * 100 : b.count)),
+      );
+      const ceiling = Math.max(1, peak * 1.2),
+        y = (v) => T + h - (v / ceiling) * h;
+      for (let i = 0; i <= 4; i++) {
+        const v = (ceiling * i) / 4,
+          yy = y(v);
+        line(svg, L, yy, W - R, yy, "var(--chart-grid)", {
+          "stroke-width": 1,
+          "stroke-dasharray": "3 4",
+        });
+        label(svg, L - 9, yy + 4, format(v) + (relative ? " %" : ""), "end");
+      }
+      bins.forEach((b, i) => {
+        if (!smooth) {
+          const v = relative ? b.relative * 100 : b.count;
+          const bar = svgNode("rect", {
+            x: L + (i * w) / bins.length + 2,
+            y: y(v),
+            width: Math.max(1, w / bins.length - 4),
+            height: y(0) - y(v),
+            rx: 3,
+            fill: relative ? blue : "var(--chart-bar)",
+          });
+          bar.append(
+            svgNode(
+              "title",
+              {},
+              `${format(b.lower)} a ${format(b.upper)}: ${b.count} datos (${format(b.relative * 100)} %)`,
+            ),
+          );
+          svg.append(bar);
+        }
+        // Limita las etiquetas visibles, sin quitar intervalos del cálculo.
+        if (
+          bins.length <= 8 ||
+          i % Math.ceil(bins.length / 7) === 0 ||
+          i === bins.length - 1
+        ) {
+          label(svg, x(i), H - B + 19, format(b.midpoint));
+        }
+      });
+      if (!relative) {
+        const points = bins.map((b, i) => [x(i), y(b.count)]);
+        svg.append(
+          svgNode("polyline", {
+            points: [[L, y(0)], ...points, [W - R, y(0)]]
+              .map((p) => p.join(","))
+              .join(" "),
+            fill: "none",
+            stroke: smooth ? blue : red,
+            "stroke-width": 2,
+          }),
+        );
+        points.forEach(([px, py], i) => {
+          const c = svgNode("circle", {
+            cx: px,
+            cy: py,
+            r: 3.5,
+            fill: smooth ? blue : red,
+          });
+          c.append(
+            svgNode(
+              "title",
+              {},
+              `Marca ${format(bins[i].midpoint)}: ${bins[i].count} datos`,
+            ),
+          );
+          svg.append(c);
+        });
+        if (smooth) {
+          // Media móvil centrada, con dos vecinos en los extremos.
+          // Las curvas Bézier conectan valores sin sobrepasar el rango de cada segmento.
+          const averaged = bins.map((_, i) => {
+            const neighbors = bins.slice(
+              Math.max(0, i - 1),
+              Math.min(bins.length, i + 2),
+            );
+            return (
+              neighbors.reduce((sum, b) => sum + b.count, 0) / neighbors.length
+            );
+          });
+          const points = averaged.map((v, i) => [x(i), y(v)]);
+          let path = `M ${points[0][0]} ${points[0][1]}`;
+          for (let i = 1; i < points.length; i++) {
+            const [ax, ay] = points[i - 1],
+              [bx, by] = points[i],
+              middle = (ax + bx) / 2;
+            path += ` C ${middle} ${ay}, ${middle} ${by}, ${bx} ${by}`;
+          }
+          svg.append(
+            svgNode("path", {
+              d: path,
+              fill: "none",
+              stroke: red,
+              "stroke-width": 2.5,
+            }),
+          );
+          if (points.length === 1)
+            svg.append(
+              svgNode("circle", {
+                cx: points[0][0],
+                cy: points[0][1],
+                r: 5,
+                fill: "none",
+                stroke: red,
+                "stroke-width": 2,
+              }),
+            );
+        }
+      }
+      label(
+        svg,
+        L,
+        T - 10,
+        relative ? "Frecuencia (%)" : "Frecuencia",
+        "start",
+      );
+      label(svg, L + w / 2, H - 8, "Marcas de clase (puntos medios)");
+      mount(
+        id,
+        svg,
+        `${relative ? "Distribución de frecuencia relativa" : smooth ? "Polígono y media móvil de tres intervalos" : "Histograma y polígono de frecuencia"}: ${values.length} datos, ${bins.length} intervalos. ${bins.map((b) => `${format(b.lower)} a ${format(b.upper)}: ${b.count} datos, ${format(b.relative * 100)} por ciento`).join("; ")}`,
+      );
+    }
+    // Caja horizontal con bigotes a observaciones reales y puntos atípicos separados.
+    const b = boxPlotSummary(values),
+      svg = makeSvg();
+    const min = Math.min(...values),
+      max = Math.max(...values),
+      padding = (max - min) * 0.12 || Math.max(Math.abs(min) * 0.05, 1);
+    const lo = min - padding,
+      hi = max + padding,
+      xValue = (v) => L + ((v - lo) / (hi - lo)) * w,
+      cy = 110;
+    for (let i = 0; i <= 4; i++) {
+      const value = lo + ((hi - lo) * i) / 4,
+        xx = xValue(value);
+      line(svg, xx, T, xx, H - B, "var(--chart-grid)", { "stroke-width": 1 });
+      label(svg, xx, H - B + 20, format(value));
+    }
+    line(svg, xValue(b.lowerWhisker), cy, xValue(b.upperWhisker), cy);
+    for (const value of [b.lowerWhisker, b.upperWhisker])
+      line(svg, xValue(value), cy - 22, xValue(value), cy + 22);
+    svg.append(
+      svgNode("rect", {
+        x: xValue(b.q1),
+        y: cy - 35,
+        width: Math.max(0, xValue(b.q3) - xValue(b.q1)),
+        height: 70,
+        fill: "var(--chart-area)",
+        stroke: blue,
+        "stroke-width": 2,
+      }),
+    );
+    line(svg, xValue(b.median), cy - 35, xValue(b.median), cy + 35, red, {
+      "stroke-width": 3,
+    });
+    b.outliers.forEach((value, i) => {
+      const point = svgNode("circle", {
+        cx: xValue(value),
+        cy: cy + ((i % 3) - 1) * 8,
+        r: 4,
+        fill: red,
+      });
+      point.append(svgNode("title", {}, `Atípico: ${format(value)}`));
+      svg.append(point);
+    });
+    label(svg, L + w / 2, H - 8, "Valores numéricos");
+    label(
+      svg,
+      L,
+      T - 10,
+      `Q1: ${format(b.q1)} · Mediana: ${format(b.median)} · Q3: ${format(b.q3)}`,
+      "start",
+    );
+    mount(
+      "boxplot",
+      svg,
+      `Caja y bigotes: Q1 ${format(b.q1)}, mediana ${format(b.median)}, Q3 ${format(b.q3)}, bigote inferior ${format(b.lowerWhisker)}, bigote superior ${format(b.upperWhisker)}, ${b.outliers.length} atípicos.`,
+    );
+  }
+
+  // Q1, Q2 y Q3 son cortes internos; Q4 es el límite superior del conjunto.
+  function updateQuartile() {
+    const number = Number($("quartile-select").value);
+    const hasData = Boolean(current && values.length);
+    const valid = Number.isInteger(number) && number >= 1 && number <= 4;
+    $("quartile-select").disabled = !hasData;
+    let result = 0;
+    if (hasData && valid) {
+      const stats = statistics(values);
+      result = [stats.q1, stats.median, stats.q3, stats.max][number - 1];
+    }
+    $("quartile-value").textContent = format(result);
+    $("quartile-description").textContent = !hasData
+      ? "Selecciona un análisis del historial."
+      : valid
+        ? `Q${number}: percentil ${number * 25}${number === 2 ? "; corresponde a la mediana" : number === 4 ? "; corresponde al valor máximo" : "; calculado con interpolación lineal"}.`
+        : "Elige el cuartil que deseas consultar, del Q1 al Q4.";
+  }
+
+  // El usuario elige un decil; al cambiar el análisis se actualiza con sus valores.
+  function updateDecile() {
+    const number = Number($("decile-select").value);
+    const hasData = Boolean(current && values.length);
+    $("decile-select").disabled = !hasData;
+    $("decile-value").textContent =
+      hasData && number >= 1 && number <= 10
+        ? format(decile(values, number))
+        : "0";
+    $("decile-description").textContent = !hasData
+      ? "Selecciona un análisis del historial."
+      : number >= 1 && number <= 10
+        ? `D${number}: percentil ${number * 10}. Calculado con interpolación lineal${number === 10 ? "; corresponde al valor máximo" : ""}.`
+        : "Elige el decil que deseas consultar, del D1 al D10.";
+  }
+
   // Recalcula y actualiza tarjetas, distribución, tabla y gráfico para el conjunto seleccionado.
   function render() {
     // Ceros de presentación mientras no se elija un análisis; no representan una muestra real.
@@ -345,8 +669,6 @@ if ($("dashboard")) {
     }
     $("detail-stats").replaceChildren();
     for (const [title, value] of [
-      ["Primer cuartil · Q1", s.q1],
-      ["Tercer cuartil · Q3", s.q3],
       ["Rango intercuartílico", s.iqr],
       ["Mínimo / Máximo", `${format(s.min)} / ${format(s.max)}`],
       ["Desviación estándar", s.std],
@@ -362,6 +684,8 @@ if ($("dashboard")) {
       );
       $("detail-stats").append(row);
     }
+    updateQuartile();
+    updateDecile();
     const table = node("table"),
       head = node("thead"),
       tr = node("tr");
@@ -381,9 +705,10 @@ if ($("dashboard")) {
     table.append(head, tbody);
     $("data-table").replaceChildren(table);
     $("table-count").textContent = `${s.n} datos · orden ascendente`;
-    if (hasData) {
+    renderAdditionalCharts();
+    if (hasData && ["line", "histogram"].includes(chartType)) {
       chart(s);
-    } else {
+    } else if (!hasData) {
       $("chart").replaceChildren(
         node(
           "p",
@@ -395,6 +720,7 @@ if ($("dashboard")) {
       $("chart-title").textContent = "Comportamiento de los datos";
       $("chart-count").textContent = "0 observaciones";
     }
+    updateChartSelection();
   }
   // No se selecciona ningún registro automáticamente; la elección vive solo en esta página.
   function showView(view) {
@@ -480,8 +806,8 @@ if ($("dashboard")) {
   function updateValueCount() {
     const text = $("values").value.trim();
     const count = text ? text.split(/[\s,;]+/).length : 0;
-    $("values-count").textContent = `${count} de 50 datos`;
-    $("values-count").classList.toggle("error", count > 50);
+    $("values-count").textContent = `${count} de 100 datos`;
+    $("values-count").classList.toggle("error", count > 100);
     let error = "";
     if ($("values").value) {
       try {
@@ -507,18 +833,15 @@ if ($("dashboard")) {
     $("dataset-name").setAttribute("aria-invalid", String(Boolean(error)));
   });
   $("values").addEventListener("input", updateValueCount);
-  $("line-chart").onclick = () => {
-    chartType = "line";
-    $("line-chart").classList.add("active");
-    $("histogram").classList.remove("active");
-    render();
-  };
-  $("histogram").onclick = () => {
-    chartType = "histogram";
-    $("histogram").classList.add("active");
-    $("line-chart").classList.remove("active");
-    render();
-  };
+  $("quartile-select").addEventListener("change", updateQuartile);
+  $("decile-select").addEventListener("change", updateDecile);
+  // Todos los botones cambian el tipo de gráfica sin cambiar el conjunto del historial.
+  for (const [key, [buttonId]] of Object.entries(chartOptions)) {
+    $(buttonId).onclick = () => {
+      chartType = key;
+      render();
+    };
+  }
   // Abre el formulario de ingreso y coloca el foco en el nombre del conjunto.
   $("new-analysis").onclick = () => {
     location.hash = "data-entry";

@@ -1101,10 +1101,9 @@ footer {
 
 /* El contenido corto no centra verticalmente el encabezado dentro del grid. */
 .workspace-header {
-  position: sticky;
-  top: 0;
+  position: relative;
   z-index: 10;
-  background: var(--paper);
+  background: transparent;
 }
 /* Reserva la misma altura incluso si Nuevo ingreso está oculto en el formulario. */
 .workspace-header .page-heading {
@@ -1123,7 +1122,9 @@ footer {
   }
 }
 
-.history-hint:hover { text-decoration: underline; }
+.history-hint:hover {
+  text-decoration: underline;
+}
 
 /* Presentación académica debajo del escudo, adaptable a pantallas pequeñas. */
 .student-info {
@@ -1134,5 +1135,465 @@ footer {
   line-height: 1.7;
   overflow-wrap: anywhere;
 }
-.student-info p { margin: 0 0 6px; }
-.student-info strong { color: var(--teal); }
+.student-info p {
+  margin: 0 0 6px;
+}
+.student-info strong {
+  color: var(--teal);
+}
+
+/* Cuatro gráficos complementarios, dos columnas en escritorio y una en móviles. */
+.extra-charts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+.extra-chart {
+  height: 270px;
+  display: grid;
+  align-items: center;
+}
+.extra-chart svg {
+  width: 100%;
+  height: 100%;
+}
+.chart-description {
+  font-size: 11px;
+  color: var(--muted);
+  margin: 12px 0 0;
+}
+@media (max-width: 1100px) {
+  .extra-charts {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Todas las gráficas comparten tarjeta y selector; los botones se ajustan al ancho. */
+.chart-card > .card-heading {
+  flex-direction: column;
+  align-items: stretch;
+}
+.chart-selector {
+  flex-wrap: wrap;
+  gap: 4px;
+  align-self: stretch;
+}
+.chart-selector button {
+  flex: 1 1 auto;
+  padding: 8px 10px;
+  font-size: 11px;
+}
+.chart-panel {
+  min-width: 0;
+}
+.chart-panel .extra-chart {
+  margin-top: 12px;
+}
+
+/* Consulta individual de los deciles sin recargar el dashboard. */
+.decile-section,
+.quartile-section {
+  margin-top: 20px;
+  padding-top: 4px;
+  border-top: 1px solid var(--line);
+}
+.decile-section output,
+.quartile-section output {
+  font-weight: 700;
+}
+
+/* Login inspirado en la referencia: panel central y paleta institucional. */
+.auth-page {
+  padding: 16px;
+  background: #f3f6f9;
+}
+.auth-page .auth-layout {
+  min-height: calc(100dvh - 32px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  padding: 34px 20px;
+  border-radius: 22px;
+  background:
+    radial-gradient(ellipse at 18% 25%, #297da3 0%, transparent 48%),
+    radial-gradient(ellipse at 85% 85%, #235f7a 0%, transparent 48%),
+    linear-gradient(135deg, #102f45, #164e70 55%, #0d2c43);
+}
+.auth-page .university-panel {
+  padding: 0;
+  gap: 12px;
+  border: 0;
+  background: none;
+}
+.auth-page .university-logo {
+  width: 78px;
+  max-width: 78px;
+  height: auto;
+}
+.auth-page .student-info {
+  font-size: 11px;
+  line-height: 1.65;
+  color: #e0eaf1;
+}
+.auth-page .student-info p {
+  margin: 0;
+}
+.auth-page .student-info strong {
+  color: #e4c487;
+}
+.auth-page .auth-panel {
+  width: 100%;
+  padding: 0;
+}
+.auth-page .auth-box {
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+}
+.auth-page #auth-title {
+  text-align: center;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin: 0 0 20px;
+  line-height: 1.4;
+}
+.auth-page #auth-form {
+  background: #0b2435ed;
+  border-top: 2px solid #b58b3a;
+  padding: 26px;
+  border-radius: 3px;
+  box-shadow: 0 16px 42px #071b3330;
+}
+.auth-page .auth-field {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  background: #e9eef2;
+  margin-bottom: 14px;
+  min-height: 46px;
+}
+.auth-field-icon {
+  flex: 0 0 43px;
+  display: grid;
+  place-items: center;
+  color: #245c7b;
+  background: #dde5eb;
+}
+.auth-page .auth-field input {
+  min-width: 0;
+  width: 100%;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 12px;
+  color: #18374b;
+  font-size: 13px;
+}
+.auth-page .auth-field input::placeholder {
+  color: #657886;
+}
+.auth-page .password-wrap input {
+  padding-right: 57px;
+}
+.auth-page .password-wrap button {
+  top: 13px;
+  right: 10px;
+  color: #17638f;
+}
+.auth-page .auth-help {
+  color: #c1d2df;
+  font-size: 10px;
+  margin: 5px 0 0;
+}
+.auth-page #auth-error {
+  color: #ffb8b8;
+  min-height: 18px;
+  margin: 12px 0;
+}
+.auth-page #auth-submit {
+  display: block;
+  border-radius: 0;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1.7px;
+  font-size: 12px;
+  padding: 13px;
+}
+.auth-page .auth-switch {
+  display: block;
+  width: calc(100% - 52px);
+  margin: 12px auto 0;
+  border: 1px solid #b58b3a70;
+  background: #0b2435;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-size: 11px;
+  padding: 13px;
+}
+.auth-page .auth-switch:hover {
+  background: #153c55;
+  border-color: #d5ae5b;
+}
+/* Conserva etiquetas accesibles para lectores de pantalla sin ocupar espacio visual. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+@media (max-width: 480px) {
+  .auth-page {
+    padding: 8px;
+  }
+  .auth-page .auth-layout {
+    min-height: calc(100dvh - 16px);
+    padding: 26px 16px;
+    border-radius: 16px;
+  }
+  .auth-page #auth-form {
+    padding: 22px;
+  }
+  .auth-page .auth-switch {
+    width: calc(100% - 44px);
+  }
+}
+
+/* Tema institucional compartido por acceso, dashboard, ingreso e historial. */
+:root {
+  --app-gradient:
+    radial-gradient(ellipse at 18% 25%, #297da3 0%, transparent 48%),
+    radial-gradient(ellipse at 85% 85%, #235f7a 0%, transparent 48%),
+    linear-gradient(135deg, #102f45, #164e70 55%, #0d2c43);
+  --app-panel: #0b2435ed;
+  --app-gold: #b58b3a;
+  --app-red: #b9262b;
+  --chart-label: #c1d2df;
+  --chart-grid: #ffffff20;
+  --chart-series: #71cdf5;
+  --chart-accent: #ff8a92;
+  --chart-area: #71cdf51c;
+  --chart-bar: #397c9c;
+}
+.auth-page .auth-layout {
+  background: var(--app-gradient);
+}
+.auth-page #auth-form {
+  background: var(--app-panel);
+  border-top-color: var(--app-gold);
+}
+.dashboard-page {
+  color-scheme: dark;
+  --ink: #f1f6fa;
+  --muted: #b9cad7;
+  --teal: #8ed9fa;
+  --violet: #ff8a92;
+  --line: #ffffff24;
+  --paper: #103147;
+  background: var(--app-gradient);
+  background-attachment: fixed;
+}
+.dashboard-page .main-content {
+  padding-bottom: 32px;
+}
+.dashboard-page .sidebar {
+  background: #0b2435f5;
+  border-top-color: var(--app-gold);
+  border-right: 1px solid var(--line);
+}
+.dashboard-page .sidebar-profile-icon {
+  color: #e4c487;
+  background: #b58b3a20;
+}
+.dashboard-page .nav-caption {
+  color: #c3d2dc;
+}
+.dashboard-page .nav-link {
+  color: #c3d2dc;
+}
+.dashboard-page .nav-link.active {
+  background: #205777;
+  color: #fff;
+  box-shadow: inset 3px 0 #d5ae5b;
+}
+.dashboard-page .nav-link:hover {
+  background: #ffffff10;
+}
+.dashboard-page .workspace-header {
+  background: transparent;
+}
+.dashboard-page .page-heading h1 {
+  color: #fff;
+}
+.dashboard-page .card,
+.dashboard-page .metric {
+  background: var(--app-panel);
+  border-color: var(--line);
+  box-shadow: 0 8px 28px #061c3420;
+}
+.dashboard-page .card {
+  border-top: 2px solid var(--app-gold);
+}
+.dashboard-page .metric {
+  border-top: 2px solid #397c9c;
+}
+.dashboard-page .metric:nth-child(2) {
+  border-top-color: #ce545b;
+}
+.dashboard-page .metric:nth-child(3) {
+  border-top-color: var(--app-gold);
+}
+.dashboard-page .metric-icon {
+  background: #235c79;
+  color: #a4e1fa;
+}
+.dashboard-page .metric:nth-child(2) .metric-icon {
+  background: #562e3c;
+  color: #ffafb5;
+}
+.dashboard-page .metric:nth-child(3) .metric-icon {
+  background: #4b4029;
+  color: #f0d49a;
+}
+.dashboard-page .eyebrow {
+  color: #e4c487;
+}
+.dashboard-page .primary {
+  background: var(--app-red);
+  color: #fff;
+  box-shadow: 0 3px 10px #0002;
+}
+.dashboard-page .primary:hover {
+  background: #a22126;
+}
+.dashboard-page .secondary {
+  background: #14374d;
+  border-color: var(--line);
+  color: var(--ink);
+}
+.dashboard-page .badge {
+  background: #b58b3a24;
+  color: #f0d49a;
+}
+.dashboard-page .segmented {
+  background: #071d2d;
+  border: 1px solid var(--line);
+}
+.dashboard-page .segmented button {
+  color: #c1d2df;
+}
+.dashboard-page .segmented button:hover {
+  background: #ffffff0d;
+  color: #fff;
+}
+.dashboard-page .segmented button.active {
+  background: var(--app-red);
+  color: #fff;
+  box-shadow: none;
+}
+.dashboard-page .stat-row {
+  border-bottom-color: var(--line);
+}
+.dashboard-page input,
+.dashboard-page textarea,
+.dashboard-page select {
+  background: #e9eef2;
+  color: #18374b;
+  border-color: #d0dce4;
+  color-scheme: light;
+}
+.dashboard-page input::placeholder,
+.dashboard-page textarea::placeholder {
+  color: #657886;
+}
+.dashboard-page .history-item {
+  background: #12354b;
+  border-color: var(--line);
+}
+.dashboard-page .history-name,
+.dashboard-page .history-hint {
+  color: #8ed9fa;
+}
+.dashboard-page th {
+  background: #173d54;
+  color: #d8e5ee;
+}
+.dashboard-page td,
+.dashboard-page th {
+  border-bottom-color: var(--line);
+}
+.dashboard-page tbody tr:nth-child(even) {
+  background: #ffffff04;
+}
+.dashboard-page tbody tr:hover {
+  background: #ffffff09;
+}
+.dashboard-page .account-icon {
+  background: #235572;
+  color: #e4c487;
+}
+.dashboard-page .user-menu-options {
+  background: #0b2435;
+  border-color: #b58b3a80;
+  box-shadow: 0 8px 24px #0004;
+}
+.dashboard-page .user-menu-options .logout-button:hover {
+  background: #1a435c;
+}
+.dashboard-page .danger,
+.dashboard-page .error {
+  color: #ffadb2;
+}
+.dashboard-page .toast {
+  background: #0b2435;
+  border: 1px solid #b58b3a80;
+  color: #fff;
+}
+.dashboard-page .legend.teal {
+  background: var(--chart-series);
+}
+.dashboard-page .legend.purple {
+  background: var(--chart-accent);
+}
+
+/* Resultados destacados, con amplitud para cifras grandes y decimales. */
+.quantile-result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 20px 16px;
+  background: #b58b3a18;
+  border: 1px solid #b58b3a80;
+  border-left: 4px solid var(--app-gold);
+  border-radius: 9px;
+  text-align: center;
+}
+.quantile-result > span {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  color: #d4e1ea;
+}
+.quartile-section .quantile-result output,
+.decile-section .quantile-result output {
+  max-width: 100%;
+  font-size: clamp(30px, 3.5vw, 44px);
+  font-weight: 800;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  color: #f2d598;
+  overflow-wrap: anywhere;
+}
