@@ -46,6 +46,7 @@ const node = (tag, text, cls) => {
 if ($("auth-form")) {
   let register = false;
   let authenticating = false;
+  let loadingStarted = 0;
   function setAuthLoading(active) {
     authenticating = active;
     $("auth-loading").hidden = !active;
@@ -53,6 +54,7 @@ if ($("auth-form")) {
     document.querySelector(".auth-layout").inert = active;
     $("auth-submit").disabled = active;
     if (active) {
+      loadingStarted = performance.now();
       $("auth-loading-title").textContent = register
         ? "Creando tu cuenta…"
         : "Iniciando sesión…";
@@ -60,6 +62,14 @@ if ($("auth-form")) {
     } else {
       $("auth-submit").focus();
     }
+  }
+  // Mantiene la animación al menos 3 segundos, contando el tiempo de autenticación.
+  async function openDashboard(replace = false) {
+    if (!authenticating) setAuthLoading(true);
+    const remaining = Math.max(0, 3000 - (performance.now() - loadingStarted));
+    await new Promise((resolve) => setTimeout(resolve, remaining));
+    if (replace) location.replace("/dashboard");
+    else location.assign("/dashboard");
   }
   // Cambia entre login y registro: muestra el nombre, ajusta required, título y botones.
   function mode(value) {
@@ -106,14 +116,16 @@ if ($("auth-form")) {
         email: $("email").value,
         password: $("password").value,
       });
-      location.assign("/dashboard");
+      await openDashboard();
     } catch (err) {
       setAuthLoading(false);
       $("auth-error").textContent = err.message;
     }
   };
   request("/api/me")
-    .then(() => location.replace("/dashboard"))
+    .then(() => {
+      if (!authenticating) return openDashboard(true);
+    })
     .catch(() => {});
 }
 // DASHBOARD: mantiene los conjuntos guardados, el conjunto seleccionado y el tipo de gráfico.
@@ -653,6 +665,7 @@ if ($("dashboard")) {
       head = node("thead"),
       header = node("tr"),
       body = node("tbody");
+    table.setAttribute("aria-labelledby", "frequency-title");
     for (const [label, title] of [
       ["Clase", "Número de clase"],
       ["Intervalo", "Límites inferior y superior"],

@@ -1659,16 +1659,75 @@ footer {
   overflow-x: auto;
 }
 .frequency-table-scroll table {
-  min-width: 580px;
+  width: 100%;
+  table-layout: fixed;
+  font-variant-numeric: tabular-nums;
 }
 .frequency-table-scroll td,
 .frequency-table-scroll th {
-  padding: 11px 9px;
-  white-space: nowrap;
+  padding: 10px 5px;
+  font-size: 11px;
+  line-height: 1.5;
+  text-align: right;
+  vertical-align: middle;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.frequency-table-scroll th:first-child {
+  width: 8%;
+}
+.frequency-table-scroll th:nth-child(2) {
+  width: 24%;
+}
+.frequency-table-scroll th:nth-child(3) {
+  width: 12%;
+}
+.frequency-table-scroll th:nth-child(4) {
+  width: 7%;
+}
+.frequency-table-scroll th:nth-child(5) {
+  width: 8%;
+}
+.frequency-table-scroll th:nth-child(6),
+.frequency-table-scroll th:nth-child(7) {
+  width: 13%;
+}
+.frequency-table-scroll th:nth-child(8) {
+  width: 15%;
+}
+.frequency-table-scroll td:first-child,
+.frequency-table-scroll th:first-child {
+  text-align: center;
+}
+.frequency-table-scroll td:nth-child(2),
+.frequency-table-scroll th:nth-child(2) {
+  text-align: left;
 }
 .frequency-table-scroll tfoot {
   font-weight: 700;
   color: #f2d598;
+}
+.frequency-key {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+  gap: 8px 12px;
+  margin: 14px 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-size: 10px;
+  color: var(--muted);
+}
+.frequency-key > div {
+  display: flex;
+  gap: 6px;
+}
+.frequency-key dt {
+  min-width: 16px;
+  font-weight: 700;
+  color: #f2d598;
+}
+.frequency-key dd {
+  margin: 0;
 }
 #analysis-content > .distribution {
   margin-top: 20px;

@@ -315,12 +315,16 @@
             </article>
             <!-- Tabla ubicada junto al selector de gráficas. -->
             <article class="card frequency-card">
-              <h2>Tabla de frecuencia agrupada</h2>
+              <h2 id="frequency-title">Tabla de frecuencia agrupada</h2>
               <div id="grouped-table" class="frequency-table-scroll"></div>
-              <p class="field-help">
-                xi: marca de clase · fi: frecuencia absoluta · Fi: acumulada ·
-                hi: relativa · Hi: relativa acumulada.
-              </p>
+              <dl class="frequency-key">
+                <div><dt>xi</dt><dd>Marca de clase</dd></div>
+                <div><dt>fi</dt><dd>Frecuencia absoluta</dd></div>
+                <div><dt>Fi</dt><dd>Absoluta acumulada</dd></div>
+                <div><dt>hi</dt><dd>Frecuencia relativa</dd></div>
+                <div><dt>Hi</dt><dd>Relativa acumulada</dd></div>
+                <div><dt>%</dt><dd>Porcentaje de clase</dd></div>
+              </dl>
               <p class="field-help">
                 Intervalos [Li, Ls): incluyen el límite inferior y excluyen el
                 superior. La última clase también incluye Xmax. Los porcentajes
