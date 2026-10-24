@@ -45,6 +45,22 @@ const node = (tag, text, cls) => {
 // PANTALLA DE ACCESO: este bloque solo se ejecuta donde existe el formulario.
 if ($("auth-form")) {
   let register = false;
+  let authenticating = false;
+  function setAuthLoading(active) {
+    authenticating = active;
+    $("auth-loading").hidden = !active;
+    $("auth-form").setAttribute("aria-busy", String(active));
+    document.querySelector(".auth-layout").inert = active;
+    $("auth-submit").disabled = active;
+    if (active) {
+      $("auth-loading-title").textContent = register
+        ? "Creando tu cuenta…"
+        : "Iniciando sesión…";
+      $("auth-loading").focus();
+    } else {
+      $("auth-submit").focus();
+    }
+  }
   // Cambia entre login y registro: muestra el nombre, ajusta required, título y botones.
   function mode(value) {
     register = value;
@@ -81,8 +97,9 @@ if ($("auth-form")) {
   // El botón se desactiva temporalmente para evitar envíos duplicados.
   $("auth-form").onsubmit = async (e) => {
     e.preventDefault();
+    if (authenticating) return;
     $("auth-error").textContent = "";
-    $("auth-submit").disabled = true;
+    setAuthLoading(true);
     try {
       await request(register ? "/api/register" : "/api/login", "POST", {
         name: $("name").value,
@@ -91,9 +108,8 @@ if ($("auth-form")) {
       });
       location.assign("/dashboard");
     } catch (err) {
+      setAuthLoading(false);
       $("auth-error").textContent = err.message;
-    } finally {
-      $("auth-submit").disabled = false;
     }
   };
   request("/api/me")

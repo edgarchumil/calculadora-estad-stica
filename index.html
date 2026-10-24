@@ -160,5 +160,30 @@
         </div>
       </section>
     </main>
+    <div id="auth-loading" class="auth-loading" role="status" aria-live="polite" tabindex="-1" hidden>
+      <div class="auth-loading-card">
+        <svg class="loading-chart" viewBox="0 0 280 160" aria-hidden="true" focusable="false">
+          <path class="loading-grid" d="M20 40H260 M20 80H260 M20 120H260" />
+          <path class="loading-axis" d="M20 20V140H260" />
+          <g class="loading-bars">
+            <rect x="32" y="105" width="32" height="35" />
+            <rect x="78" y="75" width="32" height="65" />
+            <rect x="124" y="35" width="32" height="105" />
+            <rect x="170" y="60" width="32" height="80" />
+            <rect x="216" y="95" width="32" height="45" />
+          </g>
+          <polyline class="loading-polygon" points="20,140 48,105 94,75 140,35 186,60 232,95 260,140" pathLength="1" />
+          <g class="loading-points">
+            <circle cx="48" cy="105" r="4" />
+            <circle cx="94" cy="75" r="4" />
+            <circle cx="140" cy="35" r="4" />
+            <circle cx="186" cy="60" r="4" />
+            <circle cx="232" cy="95" r="4" />
+          </g>
+        </svg>
+        <p id="auth-loading-title" class="auth-loading-title">Iniciando sesión…</p>
+        <p class="auth-loading-caption">Preparando tu espacio de estadística</p>
+      </div>
+    </div>
   </body>
 </html>
