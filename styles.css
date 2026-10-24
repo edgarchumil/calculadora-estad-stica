@@ -1813,6 +1813,18 @@ footer {
   font-size: 12px;
   line-height: 1.5;
 }
+.loading-retry {
+  margin-top: 18px;
+}
+.toast-close {
+  margin-left: 12px;
+  padding: 6px 10px;
+  border: 1px solid #b58b3a80;
+  border-radius: 5px;
+  background: #14374d;
+  color: #fff;
+  cursor: pointer;
+}
 @keyframes loading-bars {
   0%, 100% { transform: scaleY(0.3); opacity: 0.5; }
   50% { transform: scaleY(1); opacity: 1; }

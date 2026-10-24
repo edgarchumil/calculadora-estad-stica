@@ -10,7 +10,32 @@
   </head>
   <body class="dashboard-page">
     <!-- Estado inicial visible mientras se comprueba la sesión y se cargan los datos. -->
-    <div id="loading" class="loading">Preparando tu espacio…</div>
+    <div id="loading" class="auth-loading" role="status" aria-live="polite" tabindex="-1">
+      <div class="auth-loading-card">
+        <svg id="dashboard-loading-chart" class="loading-chart" viewBox="0 0 280 160" aria-hidden="true" focusable="false">
+          <path class="loading-grid" d="M20 40H260 M20 80H260 M20 120H260" />
+          <path class="loading-axis" d="M20 20V140H260" />
+          <g class="loading-bars">
+            <rect x="32" y="105" width="32" height="35" />
+            <rect x="78" y="75" width="32" height="65" />
+            <rect x="124" y="35" width="32" height="105" />
+            <rect x="170" y="60" width="32" height="80" />
+            <rect x="216" y="95" width="32" height="45" />
+          </g>
+          <polyline class="loading-polygon" points="20,140 48,105 94,75 140,35 186,60 232,95 260,140" pathLength="1" />
+          <g class="loading-points">
+            <circle cx="48" cy="105" r="4" />
+            <circle cx="94" cy="75" r="4" />
+            <circle cx="140" cy="35" r="4" />
+            <circle cx="186" cy="60" r="4" />
+            <circle cx="232" cy="95" r="4" />
+          </g>
+        </svg>
+        <p id="dashboard-loading-title" class="auth-loading-title">Preparando tu espacio…</p>
+        <p id="dashboard-loading-caption" class="auth-loading-caption">Cargando tus datos y visualizaciones</p>
+        <button id="dashboard-retry" class="primary loading-retry" type="button" hidden>Volver a intentar</button>
+      </div>
+    </div>
     <!-- app.js retira hidden tras cargar la cuenta. La API protege los datos en el servidor. -->
     <div id="dashboard" class="app-shell" hidden>
       <!-- Navegación lateral: los enlaces # apuntan a secciones de esta misma página. -->

@@ -12,23 +12,19 @@ import {
   boxPlotSummary,
   decile,
 } from "/stats.js";
+import { requestJson } from "/request.js";
 // Atajo para buscar un elemento por su atributo id.
 const $ = (id) => document.getElementById(id);
 // Envía JSON a la API. La cookie de sesión viaja automáticamente en el mismo origen.
 // La cabecera personalizada acompaña las comprobaciones CSRF del servidor.
 async function request(path, method = "GET", data) {
-  const r = await fetch(path, {
-    method,
-    headers: { "Content-Type": "application/json", "X-Estadia-Request": "1" },
-    ...(data ? { body: JSON.stringify(data) } : {}),
-  });
-  const json = await r.json();
-  if (!r.ok) {
-    if (r.status === 401 && location.pathname.startsWith("/dashboard"))
-      location.replace("/");
-    throw Error(json.error || "Ocurrió un error.");
+  try {
+    return await requestJson(path, method, data);
+  } catch (error) {
+    if (error.status === 401 && location.pathname.startsWith("/dashboard"))
+      location.replace("/?session=expired");
+    throw error;
   }
-  return json;
 }
 // Formatea solo la presentación; los cálculos conservan su precisión original.
 const format = (n) =>
@@ -44,6 +40,11 @@ const node = (tag, text, cls) => {
 };
 // PANTALLA DE ACCESO: este bloque solo se ejecuta donde existe el formulario.
 if ($("auth-form")) {
+  $("auth-form").addEventListener("invalid", (event) => {
+    $("auth-error").textContent = event.target.validationMessage;
+  }, true);
+  if (new URLSearchParams(location.search).get("session") === "expired")
+    $("auth-error").textContent = "Tu sesión ha terminado. Inicia sesión nuevamente.";
   let register = false;
   let authenticating = false;
   let loadingStarted = 0;
@@ -126,7 +127,10 @@ if ($("auth-form")) {
     .then(() => {
       if (!authenticating) return openDashboard(true);
     })
-    .catch(() => {});
+    .catch((error) => {
+      if (error.status !== 401 && !authenticating)
+        $("auth-error").textContent = error.message;
+    });
 }
 // DASHBOARD: mantiene los conjuntos guardados, el conjunto seleccionado y el tipo de gráfico.
 if ($("dashboard")) {
@@ -170,11 +174,19 @@ if ($("dashboard")) {
   let activeView = "overview";
   let historySelection = null;
   // Muestra una notificación temporal y reinicia su temporizador cuando llega otra.
-  function toast(message) {
+  function toast(message, isError = false) {
+    $("toast").setAttribute("role", isError ? "alert" : "status");
     $("toast").textContent = message;
     $("toast").hidden = false;
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => ($("toast").hidden = true), 4500);
+    if (isError) {
+      const close = node("button", "Cerrar", "toast-close");
+      close.type = "button";
+      close.onclick = () => { $("toast").hidden = true; };
+      $("toast").append(close);
+    } else {
+      toastTimer = setTimeout(() => ($("toast").hidden = true), 4500);
+    }
   }
   // Los gráficos SVG necesitan un espacio de nombres distinto al de los elementos HTML.
   const svgNode = (tag, attrs = {}, text) => {
@@ -964,9 +976,14 @@ if ($("dashboard")) {
     $("dataset-name").focus();
   };
   // Valida el texto, solicita guardarlo y vuelve a cargar el conjunto recién creado.
+  $("data-form").addEventListener("invalid", (event) => {
+    $("data-message").classList.add("error");
+    $("data-message").textContent = event.target.validationMessage;
+  }, true);
   $("data-form").onsubmit = async (e) => {
     e.preventDefault();
     $("data-message").textContent = "";
+    $("data-message").classList.remove("error");
     $("calculate").disabled = true;
     try {
       const name = validateDatasetName($("dataset-name").value);
@@ -975,7 +992,14 @@ if ($("dashboard")) {
         name,
         values: $("values").value,
       });
-      await refresh();
+      try {
+        await refresh();
+      } catch (error) {
+        $("data-message").classList.add("error");
+        $("data-message").textContent =
+          "El conjunto se guardó, pero no se pudo actualizar la vista. Recarga la página; no necesitas guardarlo otra vez. " + error.message;
+        return;
+      }
       location.hash = "history";
       showView("history");
       $("data-message").textContent =
@@ -984,6 +1008,7 @@ if ($("dashboard")) {
         "Conjunto guardado. Selecciona su nombre en el historial para visualizarlo.",
       );
     } catch (err) {
+      $("data-message").classList.add("error");
       $("data-message").textContent = err.message;
     } finally {
       $("calculate").disabled = false;
@@ -998,10 +1023,15 @@ if ($("dashboard")) {
       return;
     try {
       await request(`/api/datasets/${current.id}`, "DELETE");
-      await refresh();
+      try {
+        await refresh();
+      } catch (error) {
+        toast("El conjunto se eliminó, pero no se pudo actualizar la vista. Recarga la página. " + error.message, true);
+        return;
+      }
       toast("Conjunto eliminado.");
     } catch (e) {
-      toast(e.message);
+      toast(e.message, true);
     }
   };
   // Cierra el desplegable al pulsar fuera o al usar Escape, sin cerrar la sesión.
@@ -1026,7 +1056,7 @@ if ($("dashboard")) {
       await request("/api/logout", "POST", {});
       location.replace("/");
     } catch (e) {
-      toast(e.message);
+      toast(e.message, true);
     } finally {
       logoutPending = false;
       $("logout").disabled = false;
@@ -1034,6 +1064,7 @@ if ($("dashboard")) {
     }
   };
   // Primero verifica la sesión y carga los datos; solo entonces muestra el dashboard.
+  $("dashboard-retry").onclick = () => location.reload();
   try {
     const { user } = await request("/api/me");
     $("user-name").textContent = user.name;
@@ -1043,6 +1074,11 @@ if ($("dashboard")) {
     $("loading").hidden = true;
     $("dashboard").hidden = false;
   } catch (e) {
-    $("loading").textContent = e.message;
+    $("dashboard-loading-chart").hidden = true;
+    $("dashboard-loading-title").textContent = e.message;
+    $("dashboard-loading-caption").textContent =
+      "Recarga la página para volver a intentarlo.";
+    $("loading").setAttribute("role", "alert");
+    $("dashboard-retry").hidden = false;
   }
 }

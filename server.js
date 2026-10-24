@@ -54,6 +54,7 @@ const assets = {
   "/dashboard.html": ["dashboard.html", "text/html"],
   "/styles.css": ["styles.css", "text/css"],
   "/app.js": ["app.js", "text/javascript"],
+  "/request.js": ["request.js", "text/javascript"],
   "/stats.js": ["stats.js", "text/javascript"],
 };
 // Cada solicitud pasa por este controlador: API, archivo permitido o respuesta 404.

@@ -71,7 +71,7 @@ test("despliegue: archivos públicos, HTTPS tras proxy y persistencia SQLite", {
   try {
     await start();
     assert.equal((await request("/healthz")).status, 200);
-    for (const path of ["/", "/dashboard", "/styles.css", "/app.js", "/stats.js", "/assets/umg-logo.webp"])
+    for (const path of ["/", "/dashboard", "/styles.css", "/app.js", "/request.js", "/stats.js", "/assets/umg-logo.webp"])
       assert.equal((await request(path)).status, 200, path);
     for (const path of ["/server.js", "/api.js", "/schema.js", "/.env", "/.git/config", "/data/estadia.sqlite"])
       assert.equal((await request(path)).status, 404, path);
@@ -85,6 +85,23 @@ test("despliegue: archivos públicos, HTTPS tras proxy y persistencia SQLite", {
     assert.match(setCookie, /; Secure/);
     assert.match(setCookie, /HttpOnly/);
     cookie = setCookie.split(";")[0];
+    async function expectError(response, status, message) {
+      assert.equal(response.status, status);
+      assert.match(response.headers.get("content-type"), /application\/json/);
+      assert.match((await response.json()).error, message);
+    }
+    await expectError(await request("/api/register", "POST", account), 409, /No se pudo crear la cuenta/);
+    await expectError(await request("/api/login", "POST", { ...account, password: "ClaveIncorrecta123" }), 401, /Correo o contraseña incorrectos/);
+    await expectError(await request("/api/datasets", "POST", { name: "X", values: "1, 2" }), 400, /nombre/);
+    await expectError(await request("/api/datasets", "POST", { name: "Datos", values: "1, texto, 3" }), 400, /número|numérico|inválido/i);
+    await expectError(await request("/api/datasets", "POST", { name: "Datos", values: Array(101).fill(1).join(",") }), 400, /100/);
+    await expectError(await request("/api/datasets/00000000-0000-0000-0000-000000000000", "DELETE"), 404, /no encontrado/);
+    const malformed = await fetch(base + "/api/datasets", {
+      method: "POST",
+      headers: { Origin: origin, "X-Estadia-Request": "1", "Content-Type": "application/json", Cookie: cookie },
+      body: "{invalid",
+    });
+    await expectError(malformed, 400, /JSON inválido/);
     assert.equal((await request("/api/datasets", "POST", { name: "Datos", values: "1, 2, 3" })).status, 201);
     await stop();
     await start();
@@ -100,6 +117,13 @@ test("despliegue: archivos públicos, HTTPS tras proxy y persistencia SQLite", {
     cookie = login.headers.get("set-cookie").split(";")[0];
     assert.equal((await request(`/api/datasets/${datasets[0].id}`, "DELETE")).status, 200);
     assert.deepEqual((await (await request("/api/datasets")).json()).datasets, []);
+    let limited;
+    for (let attempt = 0; attempt < 11; attempt++) {
+      limited = await request("/api/login", "POST", { ...account, password: "ClaveIncorrecta123" });
+      if (limited.status === 429) break;
+      assert.equal(limited.status, 401);
+    }
+    await expectError(limited, 429, /15 minutos/);
   } finally {
     try { await stop(); } finally { await rm(directory, { recursive: true, force: true }); }
   }
