@@ -1194,9 +1194,33 @@ footer {
 /* Consulta individual de los deciles sin recargar el dashboard. */
 .decile-section,
 .quartile-section {
-  margin-top: 20px;
-  padding-top: 4px;
+  min-width: 0;
+  padding-top: 12px;
   border-top: 1px solid var(--line);
+}
+.quantile-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 12px;
+}
+.quantile-controls label {
+  margin: 0 0 6px;
+  font-size: 12px;
+}
+.quantile-controls select {
+  padding: 6px 10px;
+  font-size: 13px;
+}
+.quantile-controls .field-help {
+  margin: 6px 0 0;
+  font-size: 11px;
+}
+@media (max-width: 600px) {
+  .quantile-controls {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
 }
 .decile-section output,
 .quartile-section output {
@@ -1567,19 +1591,20 @@ footer {
   background: var(--chart-accent);
 }
 
-/* Resultados destacados, con amplitud para cifras grandes y decimales. */
+/* Resultados compactos para mantener más contenido visible. */
 .quantile-result {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
-  margin-top: 16px;
-  padding: 20px 16px;
+  justify-content: space-between;
+  gap: 4px 12px;
+  margin-top: 8px;
+  padding: 8px 12px;
   background: #b58b3a18;
   border: 1px solid #b58b3a80;
   border-left: 4px solid var(--app-gold);
   border-radius: 9px;
-  text-align: center;
+  text-align: left;
 }
 .quantile-result > span {
   font-size: 12px;
@@ -1590,7 +1615,7 @@ footer {
 .quartile-section .quantile-result output,
 .decile-section .quantile-result output {
   max-width: 100%;
-  font-size: clamp(30px, 3.5vw, 44px);
+  font-size: 24px;
   font-weight: 800;
   line-height: 1.2;
   font-variant-numeric: tabular-nums;
